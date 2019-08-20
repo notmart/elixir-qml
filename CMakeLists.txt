@@ -1,5 +1,11 @@
-cmake_minimum_required(VERSION 2.8)
+cmake_minimum_required(VERSION 3.5)
 project(qml)
+
+SET(CMAKE_CXX_STANDARD 11)
+
+
+find_package(Qt5 ${REQUIRED_QT_VERSION} REQUIRED NO_MODULE COMPONENTS Core Qml Quick Gui Widgets)
+set(CMAKE_AUTOMOC ON)
 
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/priv)
 file(GLOB QML_SRC src/*.cpp)
@@ -25,4 +31,11 @@ link_directories(
 )
 
 add_executable(qml.so ${QML_SRC})
-target_link_libraries(qml.so ${ERLANG_EI_LIBRARIES})
+
+target_link_libraries(qml.so
+                      ${ERLANG_EI_LIBRARIES}
+                      Qt5::Core
+                      Qt5::Qml
+                      Qt5::Quick
+                      Qt5::Gui
+                      Qt5::Widgets)

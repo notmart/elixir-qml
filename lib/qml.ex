@@ -11,4 +11,8 @@ defmodule QML do
   def hello do
     "QML NIF library not loaded"
   end
+
+  def exec(_path) do
+    "QML NIF library not loaded"
+  end
 end
