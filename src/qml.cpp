@@ -29,7 +29,7 @@ static ERL_NIF_TERM exec(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
     }
 
     char *path = strndup((char*) path_bin.data, path_bin.size);
-    qWarning()<<"BOOOH"<<path;
+
     return enif_make_int(env, s_application->exec(path));
 }
 

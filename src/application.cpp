@@ -23,28 +23,10 @@
 #include <QApplication>
 #include <QDebug>
 
-char **new_argv(int count, ...)
-{
-    va_list args;
-    int i;
-    char **argv = malloc((count+1) * sizeof(char*));
-    char *temp;
-    va_start(args, count);
-    for (i = 0; i < count; i++) {
-        temp = va_arg(args, char*);
-        argv[i] = malloc(sizeof(temp));
-        argv[i] = temp;
-    }
-    argv[i] = NULL;
-    va_end(args);
-    return argv;
-}
 
 Application::Application(QObject *parent)
     : QObject(parent)
 {
-    int num = 1;
-    m_app = new QApplication(num, new_argv(num, "App"));
 }
 
 Application::~Application()
@@ -53,12 +35,21 @@ Application::~Application()
 
 int Application::exec(const QString &path)
 {
-    if (!m_engine) {
-        m_engine = new QQmlApplicationEngine(this);
-    }
+    std::string name = "App";
+    std::vector<char*> argv;
+    argv.push_back((char*)name.data());
+    argv.push_back(nullptr);
+
+    int num = 1;
+    QApplication app(num, argv.data());
+
+    Q_ASSERT(!m_engine);
+    m_engine = new QQmlApplicationEngine(this);
 
     m_engine->load(path);
-    return m_app->exec();
+    const int ret = app.exec();
+    delete m_engine;
+    return ret;
 }
 
 #include "moc_application.cpp"
