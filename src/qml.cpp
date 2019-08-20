@@ -13,6 +13,6 @@ static ErlNifFunc nif_funcs[] =
     {"hello", 0, hello}
 };
 
-ERL_NIF_INIT(niftest,nif_funcs,NULL,NULL,NULL,NULL)
+ERL_NIF_INIT(Elixir.QML,nif_funcs,NULL,NULL,NULL,NULL)
 
 }

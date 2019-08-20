@@ -1,12 +1,14 @@
-defmodule Qml do
+defmodule QML do
   
-  @on_load :load_nifs
+  @on_load :init
 
-  def load_nif do
-    :ok = :erlang.load_nif('./qml', 0)
+  app = Mix.Project.config[:app]
+
+  def init do
+    :ok = unquote(app) |> :code.priv_dir |> :filename.join('qml') |> :erlang.load_nif(0) 
   end
 
-  def dello do
+  def hello do
     "QML NIF library not loaded"
   end
 end
