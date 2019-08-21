@@ -44,10 +44,10 @@ public:
 
     void processEvents();
 
-    ErlNifPid* pid = nullptr;
+    ErlNifPid *pid;
 
 private:
-    static QApplication s_app;
+  //  static QApplication s_app;
     QPointer<QQmlApplicationEngine> m_engine;
 };
 

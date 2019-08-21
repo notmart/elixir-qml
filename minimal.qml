@@ -18,6 +18,7 @@
  */
 
 import QtQuick 2.1
+import QtQuick.Controls 2.2 as Controls
 import org.kde.kirigami 2.4 as Kirigami
 
 Kirigami.ApplicationWindow {
@@ -43,6 +44,7 @@ Kirigami.ApplicationWindow {
             },
             Kirigami.Action {
                 text: "action 3"
+                onTriggered: hack.send("QML SAYS HELLO")
             },
             Kirigami.Action {
                 text: "action 4"
@@ -61,6 +63,10 @@ Kirigami.ApplicationWindow {
             title: "Hello"
             Rectangle {
                 anchors.fill: parent
+            }
+            Controls.Button {
+                text: "Say Hello"
+                onClicked: hack.send("QML SAYS HELLO")
             }
         }
     }

@@ -47,7 +47,7 @@ char **makeArgV(int count, ...)
 
 int num = 1;
 
-QApplication Application::s_app(num, makeArgV(num, "App"));
+//QApplication Application::s_app(num, makeArgV(num, "App"));
 
 Application::Application(QObject *parent)
     : QObject(parent)
@@ -72,23 +72,27 @@ void Application::send(const QString &text)
 
 void Application::processEvents()
 {
-    s_app.exec();
-    s_app.processEvents();
+    //s_app.exec();
+   // s_app.processEvents();
 }
 
 int Application::exec(const QString &path)
 {
+    int num=1;
+    QApplication app(num, makeArgV(num, "App"));
     if (!m_engine) {
         m_engine = new QQmlApplicationEngine(this);
     }
+    
 
     m_engine->rootContext()->setContextProperty("hack", this);
     m_engine->load(path);
     //s_app.exec();
-    /*
-    const int ret = s_app.exec();
+
+    
+    const int ret = app.exec();
     delete m_engine;
-    return ret;*/
+    return ret;
 }
 
 #include "moc_application.cpp"

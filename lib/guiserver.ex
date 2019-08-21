@@ -4,12 +4,7 @@ defmodule GuiServer do
     def start_link() do
         GenServer.start_link(__MODULE__, [])
         QML.exec("minimal.qml")
-        spawn(GuiServer, :exec, [])
-    end
-
-    def exec do
-        QML.process_events
-        GuiServer.exec
+        spawn(QML, :exec, ["minimal.qml"])
     end
 
     def init(_) do
