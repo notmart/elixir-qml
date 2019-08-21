@@ -15,4 +15,9 @@ defmodule QML do
   def exec(_path) do
     "QML NIF library not loaded"
   end
+
+  def process_events do
+    "QML NIF library not loaded"
+  end
+  
 end

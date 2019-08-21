@@ -24,6 +24,8 @@
 #include <QPointer>
 #include <QObject>
 
+#include "erl_nif.h"
+
 class QQuickItem;
 
 
@@ -38,8 +40,14 @@ public:
 
     int exec(const QString &path);
 
+    Q_INVOKABLE void send(const QString &text);
+
+    void processEvents();
+
+    ErlNifPid* pid = nullptr;
+
 private:
-    QApplication *m_app = nullptr;
+    static QApplication s_app;
     QPointer<QQmlApplicationEngine> m_engine;
 };
 

@@ -21,35 +21,74 @@
 #include <string>
 
 #include <QApplication>
+#include <QQmlContext>
 #include <QDebug>
 
+#include "nifpp.h"
+
+#include <stdarg.h>
+
+char **makeArgV(int count, ...)
+{
+    va_list args;
+    int i;
+    char **argv = (char **)malloc((count+1) * sizeof(char*));
+    char *temp;
+    va_start(args, count);
+    for (i = 0; i < count; i++) {
+        temp = va_arg(args, char*);
+        argv[i] = (char*)malloc(sizeof(temp));
+        argv[i] = temp;
+    }
+    argv[i] = NULL;
+    va_end(args);
+    return argv;
+}
+
+int num = 1;
+
+QApplication Application::s_app(num, makeArgV(num, "App"));
 
 Application::Application(QObject *parent)
     : QObject(parent)
 {
+    
 }
 
 Application::~Application()
 {
 }
 
+void Application::send(const QString &text)
+{
+    ErlNifEnv* env = enif_alloc_env();
+
+    //pid is an HACK
+
+    enif_send(NULL, pid, env, nifpp::make(env, std::string(text.toUtf8().constData())));
+
+    enif_free_env(env);
+}
+
+void Application::processEvents()
+{
+    s_app.exec();
+    s_app.processEvents();
+}
+
 int Application::exec(const QString &path)
 {
-    std::string name = "App";
-    std::vector<char*> argv;
-    argv.push_back((char*)name.data());
-    argv.push_back(nullptr);
+    if (!m_engine) {
+        m_engine = new QQmlApplicationEngine(this);
+    }
 
-    int num = 1;
-    QApplication app(num, argv.data());
-
-    Q_ASSERT(!m_engine);
-    m_engine = new QQmlApplicationEngine(this);
-
+    m_engine->rootContext()->setContextProperty("hack", this);
     m_engine->load(path);
-    const int ret = app.exec();
+    //s_app.exec();
+    /*
+    const int ret = s_app.exec();
     delete m_engine;
-    return ret;
+    return ret;*/
 }
 
 #include "moc_application.cpp"
