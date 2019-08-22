@@ -1,14 +1,21 @@
 defmodule GuiServer do
     use GenServer
 
-    def start_link() do
-        GenServer.start_link(__MODULE__, [])
-        QML.exec("minimal.qml")
-        spawn(QML, :exec, ["minimal.qml"])
+    alias QML.Private
+
+    def start_link(file) do
+        GenServer.start_link(__MODULE__, file)
     end
 
-    def init(_) do
-        {:ok, 1}
+    def init(file) do
+        Private.register_application_server
+        guiPid = spawn(fn->Private.exec(file) end)
+        {:ok, guiPid}
+    end
+
+    def handle_info(message, state) do
+        IO.puts(message)
+        {:noreply, state}
     end
 
     def handle_call(:print, from, state) do

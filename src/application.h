@@ -42,8 +42,6 @@ public:
 
     Q_INVOKABLE void send(const QString &text);
 
-    void processEvents();
-
     ErlNifPid *pid;
 
 private:

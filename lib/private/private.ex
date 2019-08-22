@@ -1,4 +1,4 @@
-defmodule QML do
+defmodule QML.Private do
   
   @on_load :init
 
@@ -8,7 +8,7 @@ defmodule QML do
     :ok = unquote(app) |> :code.priv_dir |> :filename.join('qml') |> :erlang.load_nif(0) 
   end
 
-  def hello do
+  def register_application_server do
     "QML NIF library not loaded"
   end
 

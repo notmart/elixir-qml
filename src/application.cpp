@@ -70,12 +70,6 @@ void Application::send(const QString &text)
     enif_free_env(env);
 }
 
-void Application::processEvents()
-{
-    //s_app.exec();
-   // s_app.processEvents();
-}
-
 int Application::exec(const QString &path)
 {
     int num=1;
@@ -83,12 +77,14 @@ int Application::exec(const QString &path)
     if (!m_engine) {
         m_engine = new QQmlApplicationEngine(this);
     }
-    
+
+    connect(m_engine, &QQmlApplicationEngine::warnings, this, [this](const QList<QQmlError> &warnings) {
+        qWarning()<<"ERRORS!!!"<<warnings;
+        send(QStringLiteral("QML ENGINE ENCOUNTERED AN ERROR"));
+    });
 
     m_engine->rootContext()->setContextProperty("hack", this);
     m_engine->load(path);
-    //s_app.exec();
-
     
     const int ret = app.exec();
     delete m_engine;
