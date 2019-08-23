@@ -18,6 +18,7 @@
  */
 
 import QtQuick 2.1
+import QtQuick.Layouts 1.4
 import QtQuick.Controls 2.2 as Controls
 import org.kde.kirigami 2.4 as Kirigami
 
@@ -61,12 +62,14 @@ Kirigami.ApplicationWindow {
         id: mainPageComponent
         Kirigami.ScrollablePage {
             title: "Hello"
-            Rectangle {
-                anchors.fill: parent
-            }
-            Controls.Button {
-                text: "Say Hello"
-                onClicked: hack.send("QML SAYS HELLO")
+            ColumnLayout {
+                Controls.Label {
+                    text: hack.test
+                }
+                Controls.Button {
+                    text: "Say Hello"
+                    onClicked: hack.send("QML SAYS HELLO")
+                }
             }
         }
     }

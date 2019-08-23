@@ -32,6 +32,7 @@ class QQuickItem;
 class Application : public QObject
 {
     Q_OBJECT
+    Q_PROPERTY(QString test MEMBER m_test NOTIFY testChanged)
 
 public:
 
@@ -44,8 +45,12 @@ public:
 
     ErlNifPid *pid;
 
+Q_SIGNALS:
+    void testChanged();
+
 private:
   //  static QApplication s_app;
+    QString m_test;
     QPointer<QQmlApplicationEngine> m_engine;
 };
 
