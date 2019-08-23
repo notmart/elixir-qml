@@ -25,6 +25,7 @@
 #include <QObject>
 
 #include "erl_nif.h"
+#include "nifpp.h"
 
 class QQuickItem;
 

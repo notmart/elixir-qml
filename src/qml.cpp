@@ -6,7 +6,7 @@
 
 extern "C" {
 
-Q_GLOBAL_STATIC(Application, s_application)
+Application *s_application = nullptr;
 
 ErlNifPid* s_pid;
 
@@ -22,6 +22,9 @@ static ERL_NIF_TERM register_application_server(ErlNifEnv* env, int argc, const 
 
 static ERL_NIF_TERM hello(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
 {
+    if (!s_application) {
+        return argv[0];
+    }
     qWarning() << "WASSSUUUUUP!";
     s_application->setProperty("test", "HELLO FROM ELIXIR");
     return enif_make_string(env, "Hello world!", ERL_NIF_LATIN1);
@@ -34,6 +37,8 @@ static ERL_NIF_TERM exec(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
         return enif_make_badarg(env);
     }
 
+    s_application = new Application;
+
     ErlNifBinary path_bin;
 
     if (!enif_inspect_iolist_as_binary(env, argv[0], &path_bin)) {
@@ -44,7 +49,11 @@ static ERL_NIF_TERM exec(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
     s_application->pid = s_pid;
     char *path = strndup((char*) path_bin.data, path_bin.size);
 
-    return enif_make_int(env, s_application->exec(path));
+    const int ret = s_application->exec(path);
+
+    delete s_application;
+qWarning() << "Application is dead";
+    return enif_make_int(env, ret);
 }
 
 static ErlNifFunc nif_funcs[] =

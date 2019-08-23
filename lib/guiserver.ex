@@ -9,21 +9,26 @@ defmodule GuiServer do
 
     def init(file) do
         Private.register_application_server
-        guiPid = spawn(fn->Private.exec(file) end)
-        {:ok, guiPid}
+        guiPid = spawn(fn ->
+            Private.exec(file)
+            :init.stop
+        end)
+        {:ok, {:loading, guiPid}}
+    end
+
+    def handle_info({:loaded, _}, {_, guiPid}) do
+        {:noreply, {:loaded, guiPid}}
+    end
+
+    def handle_info({:error, file}, state) do
+        IO.puts(["Error loading ", file, ", terminating..."])
+        :init.stop
+        {:stop, :normal, state}
     end
 
     def handle_info(message, state) do
-        IO.puts(message)
+        IO.puts "info"
+        IO.inspect message
         {:noreply, state}
-    end
-
-    def handle_call(:print, from, state) do
-        IO.puts(from.tag)
-        {:reply, state, state}
-    end
-
-    def handle_cast(:increment, state) do
-        {:noreply, state+1}
     end
 end

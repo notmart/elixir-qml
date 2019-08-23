@@ -24,8 +24,6 @@
 #include <QQmlContext>
 #include <QDebug>
 
-#include "nifpp.h"
-
 #include <stdarg.h>
 
 char **makeArgV(int count, ...)
@@ -59,6 +57,7 @@ Application::~Application()
 {
 }
 
+
 void Application::send(const QString &text)
 {
     ErlNifEnv* env = enif_alloc_env();
@@ -79,8 +78,19 @@ int Application::exec(const QString &path)
     }
 
     connect(m_engine, &QQmlApplicationEngine::warnings, this, [this](const QList<QQmlError> &warnings) {
-        qWarning()<<"ERRORS!!!"<<warnings;
-        send(QStringLiteral("QML ENGINE ENCOUNTERED AN ERROR"));
+        for (const auto &warn : warnings) {
+            send(QStringLiteral("QML Engine encountered an error at line %1, column %2: %3").arg(warn.line()).arg(warn.column()).arg(warn.description()));
+        }
+    });
+
+    connect(m_engine, &QQmlApplicationEngine::objectCreated, this, [this](QObject *object, const QUrl &url) {
+        ErlNifEnv* env = enif_alloc_env();
+        if (object) {
+            enif_send(NULL, pid, env, nifpp::make(env,  std::make_tuple(nifpp::str_atom("loaded"), std::string(url.toString().toUtf8()))));
+        } else {
+            enif_send(NULL, pid, env, nifpp::make(env, std::make_tuple(nifpp::str_atom("error"), std::string(url.toString().toUtf8()))));
+        }
+        enif_free_env(env);
     });
 
     m_engine->rootContext()->setContextProperty("hack", this);
