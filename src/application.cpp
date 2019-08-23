@@ -47,8 +47,9 @@ int num = 1;
 
 //QApplication Application::s_app(num, makeArgV(num, "App"));
 
-Application::Application(QObject *parent)
-    : QObject(parent)
+Application::Application(ErlNifPid *pid, QObject *parent)
+    : QObject(parent),
+      m_pid(pid)
 {
     
 }
@@ -62,9 +63,7 @@ void Application::send(const QString &text)
 {
     ErlNifEnv* env = enif_alloc_env();
 
-    //pid is an HACK
-
-    enif_send(NULL, pid, env, nifpp::make(env, std::string(text.toUtf8().constData())));
+    enif_send(NULL, m_pid, env, nifpp::make(env, std::string(text.toUtf8().constData())));
 
     enif_free_env(env);
 }
@@ -86,9 +85,9 @@ int Application::exec(const QString &path)
     connect(m_engine, &QQmlApplicationEngine::objectCreated, this, [this](QObject *object, const QUrl &url) {
         ErlNifEnv* env = enif_alloc_env();
         if (object) {
-            enif_send(NULL, pid, env, nifpp::make(env,  std::make_tuple(nifpp::str_atom("loaded"), std::string(url.toString().toUtf8()))));
+            enif_send(NULL, m_pid, env, nifpp::make(env,  std::make_tuple(nifpp::str_atom("loaded"), std::string(url.toString().toUtf8()))));
         } else {
-            enif_send(NULL, pid, env, nifpp::make(env, std::make_tuple(nifpp::str_atom("error"), std::string(url.toString().toUtf8()))));
+            enif_send(NULL, m_pid, env, nifpp::make(env, std::make_tuple(nifpp::str_atom("error"), std::string(url.toString().toUtf8()))));
         }
         enif_free_env(env);
     });

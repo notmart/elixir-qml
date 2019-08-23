@@ -12,11 +12,9 @@ ErlNifPid* s_pid;
 
 static ERL_NIF_TERM register_application_server(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
 {
-   // qWarning() << "WASSSUUUUUP!";
     ErlNifPid* pid = (ErlNifPid*) enif_alloc(sizeof(ErlNifPid));
     s_pid = enif_self(env, pid);
     
-
     return argv[0];
 }
 
@@ -37,7 +35,7 @@ static ERL_NIF_TERM exec(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
         return enif_make_badarg(env);
     }
 
-    s_application = new Application;
+    s_application = new Application(s_pid);
 
     ErlNifBinary path_bin;
 
@@ -45,14 +43,12 @@ static ERL_NIF_TERM exec(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
         return enif_make_badarg(env);
     }
 
-    //here because can't touch a qobject before the app is exec'd
-    s_application->pid = s_pid;
     char *path = strndup((char*) path_bin.data, path_bin.size);
 
     const int ret = s_application->exec(path);
 
     delete s_application;
-qWarning() << "Application is dead";
+
     return enif_make_int(env, ret);
 }
 

@@ -1,4 +1,4 @@
-defmodule GuiServer do
+defmodule QML.Application do
     use GenServer
 
     alias QML.Private

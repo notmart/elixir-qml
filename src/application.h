@@ -37,20 +37,18 @@ class Application : public QObject
 
 public:
 
-    explicit Application(QObject *parent = nullptr);
+    explicit Application(ErlNifPid *pid, QObject *parent = nullptr);
     ~Application() override;
 
     int exec(const QString &path);
 
     Q_INVOKABLE void send(const QString &text);
 
-    ErlNifPid *pid;
-
 Q_SIGNALS:
     void testChanged();
 
 private:
-  //  static QApplication s_app;
+    ErlNifPid *m_pid;
     QString m_test;
     QPointer<QQmlApplicationEngine> m_engine;
 };
