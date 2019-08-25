@@ -58,6 +58,31 @@ Application::~Application()
 {
 }
 
+bool Application::registerQmlChannel(const QString &identifier, ErlNifPid *pid)
+{
+    if (m_elixirQmlChannels.contains(identifier)) {
+        return false;
+    }
+
+    m_elixirQmlChannels[identifier] = pid;
+
+    if (m_qmlElixirChannels.contains(identifier)) {
+        m_qmlElixirChannels[identifier]->setPid(pid);
+    }
+}
+
+bool Application::registerElixirChannel(const QString &identifier, ElixirChannel *elixirChannel)
+{
+    if (m_qmlElixirChannels.contains(identifier)) {
+        return false;
+    }
+
+    m_qmlElixirChannels[identifier] = elixirChannel;
+
+    if (m_elixirQmlChannels.contains(identifier)) {
+        elixirChannel->setPid(m_elixirQmlChannels[identifier]);
+    }
+}
 
 void Application::send(const QString &text)
 {

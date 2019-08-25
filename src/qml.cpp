@@ -42,6 +42,29 @@ static ERL_NIF_TERM register_application_server(ErlNifEnv* env, int argc, const 
     return argv[0];
 }
 
+static ERL_NIF_TERM register_qml_channel(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
+{
+    if (!s_application) {
+        return argv[0];
+    }
+
+    if (argc != 1) {
+        return enif_make_badarg(env);
+    }
+
+    ErlNifBinary identifier_bin;
+
+    if (!enif_inspect_iolist_as_binary(env, argv[0], &identifier_bin)) {
+        return enif_make_badarg(env);
+    }
+
+    char *identifier = strndup((char*) identifier_bin.data, identifier_bin.size);
+
+    ErlNifPid* pid = (ErlNifPid*) enif_alloc(sizeof(ErlNifPid));
+    s_application->registerQmlChannel(identifier, pid);
+    return argv[0];
+}
+
 static ERL_NIF_TERM hello(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
 {
     if (!s_application) {
@@ -80,6 +103,7 @@ static ErlNifFunc nif_funcs[] =
 {
     {"hello", 0, hello},
     {"register_application_server", 0, register_application_server},
+    {"register_qml_channel", 0, register_qml_channel},
     {"exec", 1, exec, ERL_NIF_DIRTY_JOB_CPU_BOUND }
 };
 

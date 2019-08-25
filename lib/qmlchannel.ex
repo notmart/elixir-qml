@@ -4,11 +4,12 @@ defmodule QMLChannel do
     alias QML.Private
 
     def start_link(identifier) do
-        GenServer.start_link(__MODULE__, identifier)
+        GenServer.start_link(__MODULE__)
+        Private.register_qml_channel identifier
     end
 
-    def init(identifier) do
-        {:ok, {identifier, %{}}}
+    def init(_) do
+        {:ok, %{}}
     end
 
     def handle_info({:signal, name, argv}, state) do
@@ -16,10 +17,11 @@ defmodule QMLChannel do
     end
 
     def handle_info(message, state) do
+        IO.inspect message
         {:noreply, state}
     end
 
-    def handle_cast({:property, name, value}, {identifier, map}) do
+    def handle_cast({:property, name, value}, map) do
         newMap = Map.put(map, name, value)
         {:noreply, newMap}
     end

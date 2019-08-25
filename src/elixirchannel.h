@@ -19,33 +19,28 @@
 
 #pragma once
 
-#include <QQmlApplicationEngine>
-#include <QApplication>
-#include <QPointer>
 #include <QObject>
-
-#include "elixirchannel.h"
 
 #include "erl_nif.h"
 #include "nifpp.h"
 
 class QQuickItem;
 
+class Application;
 
-class Application : public QObject
+class ElixirChannel : public QObject
 {
     Q_OBJECT
+    Q_PROPERTY(QString identifier MEMBER m_identifier NOTIFY testChanged)
     Q_PROPERTY(QString test MEMBER m_test NOTIFY testChanged)
 
 public:
 
-    explicit Application(ErlNifPid *pid, QObject *parent = nullptr);
-    ~Application() override;
+    explicit ElixirChannel(QObject *parent = nullptr);
+    ~ElixirChannel() override;
 
-    bool registerQmlChannel(const QString &identifier, ErlNifPid *pid);
-    bool registerElixirChannel(const QString &identifier, ElixirChannel *elixirChannel);
-
-    int exec(const QString &path);
+    void setPid(ErlNifPid *pid);
+    ErlNifPid *pid() const;
 
     Q_INVOKABLE void send(const QString &text);
 
@@ -54,13 +49,9 @@ Q_SIGNALS:
 
 private:
     ErlNifPid *m_pid;
+    QString m_identifier;
     QString m_test;
-    QPointer<QQmlApplicationEngine> m_engine;
-
-    // Keus must correspond
-    // pids of the elixir-side QmlChannel
-    QHash<QString, ErlNifPid *> m_elixirQmlChannels;
-    // QML-side ElixirChannel
-    QHash<QString, ElixirChannel *>  m_qmlElixirChannels;
+    static Application *s_spplication;
+    friend class Application;
 };
 
