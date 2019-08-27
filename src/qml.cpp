@@ -60,6 +60,7 @@ static ERL_NIF_TERM register_qml_channel(ErlNifEnv* env, int argc, const ERL_NIF
     char *identifier = strndup((char*) identifier_bin.data, identifier_bin.size);
 
     ErlNifPid* pid = (ErlNifPid*) enif_alloc(sizeof(ErlNifPid));
+    pid = enif_self(env, pid);
     s_application->registerQmlChannel(identifier, pid);
     return argv[0];
 }
@@ -102,7 +103,7 @@ static ErlNifFunc nif_funcs[] =
 {
     {"hello", 0, hello},
     {"register_application_server", 0, register_application_server},
-    {"register_qml_channel", 0, register_qml_channel},
+    {"register_qml_channel", 1, register_qml_channel},
     {"exec", 1, exec, ERL_NIF_DIRTY_JOB_CPU_BOUND }
 };
 

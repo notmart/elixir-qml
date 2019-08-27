@@ -51,7 +51,7 @@ Application::Application(ErlNifPid *pid, QObject *parent)
     : QObject(parent),
       m_pid(pid)
 {
-    
+    qmlRegisterType<ElixirChannel>("qmlelixir", 1, 0, "ElixirChannel");
 }
 
 Application::~Application()

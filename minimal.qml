@@ -21,6 +21,7 @@ import QtQuick 2.1
 import QtQuick.Layouts 1.4
 import QtQuick.Controls 2.2 as Controls
 import org.kde.kirigami 2.4 as Kirigami
+import qmlelixir 1.0
 
 Kirigami.ApplicationWindow {
     id: root
@@ -62,6 +63,10 @@ Kirigami.ApplicationWindow {
         id: mainPageComponent
         Kirigami.ScrollablePage {
             title: "Hello"
+            ElixirChannel {
+                identifier: "elixirTestChannel"
+                test: textField.text
+            }
             ColumnLayout {
                 Controls.Label {
                     text: hack.test
@@ -69,6 +74,9 @@ Kirigami.ApplicationWindow {
                 Controls.Button {
                     text: "Say Hello"
                     onClicked: hack.send("QML SAYS HELLO")
+                }
+                Controls.TextField {
+                    id: textField
                 }
             }
         }

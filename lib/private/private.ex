@@ -16,6 +16,10 @@ defmodule QML.Private do
     "QML NIF library not loaded"
   end
 
+  def register_qml_channel(_identifier) do
+    "QML NIF library not loaded"
+  end
+
   def exec(_path) do
     "QML NIF library not loaded"
   end

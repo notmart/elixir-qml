@@ -30,8 +30,10 @@ ElixirChannel::ElixirChannel(QObject *parent)
 {
     connect(this, &ElixirChannel::testChanged, this, [this]() {
         ErlNifEnv* env = enif_alloc_env();
-    
-        enif_send(NULL, m_pid, env, nifpp::make(env,  std::make_tuple(nifpp::str_atom("$gen_cast"), std::make_tuple(nifpp::str_atom("property"), std::string("test"), std::string(m_test.toUtf8().constData())))));
+
+       // enif_send(NULL, m_pid, env, nifpp::make(env,  std::make_tuple(nifpp::str_atom("$gen_call"), std::make_tuple(nifpp::str_atom("property"), std::string("test"), std::string(m_test.toUtf8().constData())))));
+
+        enif_send(NULL, m_pid, env, nifpp::make(env,  std::make_tuple(nifpp::str_atom("property"), std::string("test"), std::string(m_test.toUtf8().constData()))));
     
         enif_free_env(env);
     });
