@@ -18,6 +18,8 @@
 */
 
 #include "elixirchannel.h"
+#include "application.h"
+
 #include <string>
 
 #include <QDebug>
@@ -52,6 +54,26 @@ ErlNifPid *ElixirChannel::pid() const
 {
     return m_pid;
 }
+
+void ElixirChannel::setIdentifier(const QString &identifier)
+{
+    if (m_identifier == identifier) {
+        return;
+    }
+
+    //ability to change it on the fly?
+    m_identifier = identifier;
+    Application::self()->registerElixirChannel(identifier, this);
+
+    emit identifierChanged();
+}
+
+QString ElixirChannel::identifier() const
+{
+    return m_identifier;
+}
+
+
 
 void ElixirChannel::send(const QString &text)
 {

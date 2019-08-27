@@ -17,7 +17,6 @@
 *   51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
-#include "qml.h"
 #include "erl_nif.h"
 #include "application.h"
 
@@ -29,7 +28,7 @@ Application *s_application = nullptr;
 
 ErlNifPid* s_pid;
 
-Application *application()
+Application *Application::self()
 {
     return s_application;
 }

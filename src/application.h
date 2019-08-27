@@ -42,6 +42,8 @@ public:
     explicit Application(ErlNifPid *pid, QObject *parent = nullptr);
     ~Application() override;
 
+    static Application *self();
+
     bool registerQmlChannel(const QString &identifier, ErlNifPid *pid);
     bool registerElixirChannel(const QString &identifier, ElixirChannel *elixirChannel);
 

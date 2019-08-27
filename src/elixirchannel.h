@@ -31,7 +31,7 @@ class Application;
 class ElixirChannel : public QObject
 {
     Q_OBJECT
-    Q_PROPERTY(QString identifier MEMBER m_identifier NOTIFY testChanged)
+    Q_PROPERTY(QString identifier READ identifier WRITE setIdentifier NOTIFY identifierChanged)
     Q_PROPERTY(QString test MEMBER m_test NOTIFY testChanged)
 
 public:
@@ -42,10 +42,14 @@ public:
     void setPid(ErlNifPid *pid);
     ErlNifPid *pid() const;
 
+    void setIdentifier(const QString &identifier);
+    QString identifier() const;
+
     Q_INVOKABLE void send(const QString &text);
 
 Q_SIGNALS:
     void testChanged();
+    void identifierChanged();
 
 private:
     ErlNifPid *m_pid;
