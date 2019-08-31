@@ -20,6 +20,7 @@
 #pragma once
 
 #include <QObject>
+#include <QQmlParserStatus>
 
 #include "erl_nif.h"
 #include "nifpp.h"
@@ -28,11 +29,12 @@ class QQuickItem;
 
 class Application;
 
-class ElixirChannel : public QObject
+class ElixirChannel : public QObject, public QQmlParserStatus
 {
     Q_OBJECT
     Q_PROPERTY(QString identifier READ identifier WRITE setIdentifier NOTIFY identifierChanged)
-    Q_PROPERTY(QString test MEMBER m_test NOTIFY testChanged)
+
+    Q_INTERFACES(QQmlParserStatus)
 
 public:
 
@@ -47,14 +49,21 @@ public:
 
     Q_INVOKABLE void send(const QString &text);
 
+    //TODO: put in an internal object not accessible from QML
+    Q_INVOKABLE void sendProperty(const QString &property, const QVariant &value);
+
+protected:
+    void classBegin() override;
+    void componentComplete() override;
+
 Q_SIGNALS:
     void testChanged();
     void identifierChanged();
 
 private:
-    ErlNifPid *m_pid;
+    ErlNifPid *m_pid = nullptr;
     QString m_identifier;
-    QString m_test;
+    QObject *m_metaObjectSpy = nullptr;
     static Application *s_spplication;
     friend class Application;
 };

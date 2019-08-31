@@ -65,7 +65,7 @@ Kirigami.ApplicationWindow {
             title: "Hello"
             ElixirChannel {
                 identifier: "elixirTestChannel"
-                test: textField.text
+                property alias test: textField.text
             }
             ColumnLayout {
                 Controls.Label {
