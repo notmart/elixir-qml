@@ -1,6 +1,7 @@
 defmodule QML.Application do
     use GenServer
 
+
     alias QML.Private
 
     def start_link(file) do

@@ -82,6 +82,22 @@ bool Application::registerElixirChannel(const QString &identifier, ElixirChannel
     if (m_elixirQmlChannels.contains(identifier)) {
         elixirChannel->setPid(m_elixirQmlChannels[identifier]);
     }
+
+    ErlNifEnv* env = enif_alloc_env();
+
+    enif_send(NULL, m_pid, env, nifpp::make(env,  std::make_tuple(nifpp::str_atom("channel_registered"), std::string(identifier.toUtf8().constData()))));
+
+    enif_free_env(env);
+
+    connect(elixirChannel, &QObject::destroyed, this, [this, identifier]() {
+        m_qmlElixirChannels.remove(identifier);
+
+        ErlNifEnv* env = enif_alloc_env();
+
+        enif_send(NULL, m_pid, env, nifpp::make(env,  std::make_tuple(nifpp::str_atom("channel_removed"), std::string(identifier.toUtf8().constData()))));
+
+        enif_free_env(env);
+    });
 }
 
 void Application::send(const QString &text)
