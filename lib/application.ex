@@ -1,25 +1,22 @@
 defmodule QML.Application do
     use GenServer
 
-    #TODO: this goes into ChannelManager
-    #@callback channel_registered(arg :: any) :: any
-
     alias QML.Private
 
-    def start_link(file) do
-        GenServer.start_link(__MODULE__, file)
+    def start_link({channelManager, file}) do
+        GenServer.start_link(__MODULE__, {channelManager, file})
     end
 
-    def init(file) do
+    def init({channelManager, file}) do
         Private.register_application_server
         guiPid = spawn(fn ->
             Private.exec(file)
             :init.stop
         end)
-        {:ok, {:loading, guiPid}}
+        {:ok, {:loading, channelManager, file, guiPid}}
     end
 
-    def handle_info({:loaded, _}, {_, guiPid}) do
+    def handle_info({:loaded, _}, {_, _, _, guiPid}) do
         {:noreply, {:loaded, guiPid}}
     end
 
@@ -29,11 +26,12 @@ defmodule QML.Application do
         {:stop, :normal, state}
     end
 
-    def handle_info({:channel_registered, identifier}, state) do
+    def handle_info({:channel_registered, identifier}, {:loading, channelManager, file, guiPid}) do
         #__MODULE__.channel_registered identifier
-        #ChannelManager.channelForType identifier
+        operations = channelManager.channelForType identifier
+        QML.Channel.start_link({identifier, operations})
         IO.inspect identifier
-        {:noreply, state}
+        {:noreply, {:loading, channelManager, file, guiPid}}
     end
 
     # TODO: remove?
