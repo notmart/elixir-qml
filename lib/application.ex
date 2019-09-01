@@ -1,6 +1,8 @@
 defmodule QML.Application do
     use GenServer
 
+    #TODO: this goes into ChannelManager
+    #@callback channel_registered(arg :: any) :: any
 
     alias QML.Private
 
@@ -27,6 +29,14 @@ defmodule QML.Application do
         {:stop, :normal, state}
     end
 
+    def handle_info({:channel_registered, identifier}, state) do
+        #__MODULE__.channel_registered identifier
+        #ChannelManager.channelForType identifier
+        IO.inspect identifier
+        {:noreply, state}
+    end
+
+    # TODO: remove?
     def handle_info(message, state) do
         IO.puts "info"
         IO.inspect message
