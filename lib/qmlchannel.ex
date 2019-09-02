@@ -12,15 +12,13 @@ defmodule QML.Channel do
         {:ok, {%{}, operations}}
     end
 
-    def handle_info({:signal, name, argv}, state) do
-        {:noreply, state}
+    def handle_info({:signal, name, argv}, {map, operations}) do
+        operations.signal(name, argv)
+        {:noreply, {map, operations}}
     end
 
     def handle_info({:property, name, value}, {map, operations}) do
-        IO.inspect name
-        IO.inspect value
         newMap = Map.put(map, name, value)
-        IO.inspect newMap
         operations.propertyChanged(name, value)
         {:noreply, {newMap, operations}}
     end

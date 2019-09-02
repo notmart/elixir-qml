@@ -8,7 +8,14 @@ defmodule TestChannelManager do
 end
 
 defmodule ElixirTestChannel do
-    @behaviour QML.ChannelOperations
+    use QML.ChannelOperations
+
+    def signal(name, params) do
+        IO.puts "On ElixirTestChannel signal"
+        IO.puts name
+        IO.puts params
+    end
+
     def propertyChanged(name, value) do
         IO.puts "On ElixirTestChannel propertyChanged"
         IO.puts name

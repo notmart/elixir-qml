@@ -64,8 +64,10 @@ Kirigami.ApplicationWindow {
         Kirigami.ScrollablePage {
             title: "Hello"
             ElixirChannel {
+                id: elixirChannel
                 identifier: "elixirTestChannel"
                 property alias test: textField.text
+                signal testSignal(string param1, string param2)
             }
             ColumnLayout {
                 Controls.Label {
@@ -73,7 +75,7 @@ Kirigami.ApplicationWindow {
                 }
                 Controls.Button {
                     text: "Say Hello"
-                    onClicked: hack.send("QML SAYS HELLO")
+                    onClicked: elixirChannel.testSignal("First param", "second param")
                 }
                 Controls.TextField {
                     id: textField

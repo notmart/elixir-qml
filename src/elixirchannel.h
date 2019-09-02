@@ -51,6 +51,7 @@ public:
 
     //TODO: put in an internal object not accessible from QML
     Q_INVOKABLE void sendProperty(const QString &property, const QVariant &value);
+    Q_INVOKABLE void sendSignal(const QString &name, const QVariant &params);
 
 protected:
     void classBegin() override;
