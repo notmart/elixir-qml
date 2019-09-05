@@ -27,10 +27,12 @@
 #include <QQmlComponent>
 #include <QDebug>
 
+int ElixirChannel::s_maxIdentifier = 0;
 
 ElixirChannel::ElixirChannel(QObject *parent)
     : QObject(parent)
 {
+    m_identifier = s_maxIdentifier++;
 }
 
 ElixirChannel::~ElixirChannel()
@@ -118,10 +120,14 @@ void ElixirChannel::setTypeId(const QString &typeId)
     if (m_typeId == typeId) {
         return;
     }
+    if (!m_typeId.isEmpty()) {
+        qWarning() << "cannot rename an ElixirChannel type";
+        return;
+    }
 
     //ability to change it on the fly?
     m_typeId = typeId;
-    Application::self()->registerElixirChannel(typeId, this);
+    Application::self()->registerElixirChannel(m_identifier, typeId, this);
 
     emit typeIdChanged();
 }

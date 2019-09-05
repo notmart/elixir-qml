@@ -32,8 +32,8 @@ defmodule QML.ApplicationServer do
         {:stop, :normal, state}
     end
 
-    def handle_info({:channel_registered, identifier}, {:loading, channelManager, file, guiPid}) do
-        qmlChannel = channelManager.channelForType identifier
+    def handle_info({:channel_registered, identifier, typeId}, {:loading, channelManager, file, guiPid}) do
+        qmlChannel = channelManager.channelForType typeId
         #QML.ChannelServer.start_link({identifier, qmlChannel})
         
         DynamicSupervisor.start_child(QML.ChannelSupervisor, {QML.ChannelServer, {identifier, qmlChannel}})

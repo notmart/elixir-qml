@@ -58,7 +58,7 @@ Application::~Application()
 {
 }
 
-bool Application::registerQmlChannel(const QString &identifier, ErlNifPid *pid)
+bool Application::registerQmlChannel(int identifier, ErlNifPid *pid)
 {
     if (m_elixirQmlChannels.contains(identifier)) {
         return false;
@@ -71,7 +71,7 @@ bool Application::registerQmlChannel(const QString &identifier, ErlNifPid *pid)
     }
 }
 
-bool Application::registerElixirChannel(const QString &identifier, ElixirChannel *elixirChannel)
+bool Application::registerElixirChannel(int identifier, const QString &typeId, ElixirChannel *elixirChannel)
 {
     if (m_qmlElixirChannels.contains(identifier)) {
         return false;
@@ -85,16 +85,22 @@ bool Application::registerElixirChannel(const QString &identifier, ElixirChannel
 
     ErlNifEnv* env = enif_alloc_env();
 
-    enif_send(NULL, m_pid, env, nifpp::make(env,  std::make_tuple(nifpp::str_atom("channel_registered"), std::string(identifier.toUtf8().constData()))));
+    enif_send(NULL, m_pid, env, nifpp::make(env,  
+        std::make_tuple(nifpp::str_atom("channel_registered"),        
+            identifier,
+            std::string(typeId.toUtf8().constData()))));
 
     enif_free_env(env);
 
-    connect(elixirChannel, &QObject::destroyed, this, [this, identifier]() {
+    connect(elixirChannel, &QObject::destroyed, this, [this, identifier, typeId]() {
         m_qmlElixirChannels.remove(identifier);
 
         ErlNifEnv* env = enif_alloc_env();
 
-        enif_send(NULL, m_pid, env, nifpp::make(env,  std::make_tuple(nifpp::str_atom("channel_removed"), std::string(identifier.toUtf8().constData()))));
+        enif_send(NULL, m_pid, env, nifpp::make(env,  
+            std::make_tuple(nifpp::str_atom("channel_removed"), 
+                identifier,
+                std::string(typeId.toUtf8().constData()))));
 
         enif_free_env(env);
     });

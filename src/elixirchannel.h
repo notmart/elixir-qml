@@ -64,8 +64,11 @@ Q_SIGNALS:
 private:
     ErlNifPid *m_pid = nullptr;
     QString m_typeId;
+    int m_identifier;
     QObject *m_metaObjectSpy = nullptr;
     static Application *s_spplication;
     friend class Application;
+
+    static int s_maxIdentifier;
 };
 

@@ -51,13 +51,8 @@ static ERL_NIF_TERM register_qml_channel(ErlNifEnv* env, int argc, const ERL_NIF
         return enif_make_badarg(env);
     }
 
-    ErlNifBinary identifier_bin;
-
-    if (!enif_inspect_iolist_as_binary(env, argv[0], &identifier_bin)) {
-        return enif_make_badarg(env);
-    }
-
-    char *identifier = strndup((char*) identifier_bin.data, identifier_bin.size);
+    int identifier;
+    enif_get_int(env, argv[0], &identifier);
 
     ErlNifPid* pid = (ErlNifPid*) enif_alloc(sizeof(ErlNifPid));
     pid = enif_self(env, pid);
