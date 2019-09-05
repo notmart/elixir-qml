@@ -13,11 +13,17 @@ defmodule QML.ApplicationServer do
             Private.exec(file)
             :init.stop
         end)
+
+        children = [
+            {DynamicSupervisor, strategy: :one_for_one, name: QML.ChannelSupervisor}
+        ]
+        Supervisor.start_link(children, strategy: :one_for_one)
+
         {:ok, {:loading, channelManager, file, guiPid}}
     end
 
-    def handle_info({:loaded, _}, {_, _, _, guiPid}) do
-        {:noreply, {:loaded, guiPid}}
+    def handle_info({:loaded, _}, {_state, channelManager, file, guiPid}) do
+        {:noreply, {:loaded, channelManager, file, guiPid}}
     end
 
     def handle_info({:error, file}, state) do
@@ -27,10 +33,17 @@ defmodule QML.ApplicationServer do
     end
 
     def handle_info({:channel_registered, identifier}, {:loading, channelManager, file, guiPid}) do
-        #__MODULE__.channel_registered identifier
         qmlChannel = channelManager.channelForType identifier
-        QML.ChannelServer.start_link({identifier, qmlChannel})
+        #QML.ChannelServer.start_link({identifier, qmlChannel})
+        
+        DynamicSupervisor.start_child(QML.ChannelSupervisor, {QML.ChannelServer, {identifier, qmlChannel}})
+        
         IO.inspect identifier
+        {:noreply, {:loading, channelManager, file, guiPid}}
+    end
+
+    def handle_info({:channel_unregistered, identifier}, {:loading, channelManager, file, guiPid}) do
+        #DynamicSupervisor.terminate_child(QML.ChannelSupervisor, map pids for identifier)
         {:noreply, {:loading, channelManager, file, guiPid}}
     end
 

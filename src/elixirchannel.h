@@ -32,7 +32,7 @@ class Application;
 class ElixirChannel : public QObject, public QQmlParserStatus
 {
     Q_OBJECT
-    Q_PROPERTY(QString identifier READ identifier WRITE setIdentifier NOTIFY identifierChanged)
+    Q_PROPERTY(QString typeId READ typeId WRITE setTypeId NOTIFY typeIdChanged)
 
     Q_INTERFACES(QQmlParserStatus)
 
@@ -44,8 +44,8 @@ public:
     void setPid(ErlNifPid *pid);
     ErlNifPid *pid() const;
 
-    void setIdentifier(const QString &identifier);
-    QString identifier() const;
+    void setTypeId(const QString &typeId);
+    QString typeId() const;
 
     Q_INVOKABLE void send(const QString &text);
 
@@ -59,11 +59,11 @@ protected:
 
 Q_SIGNALS:
     void testChanged();
-    void identifierChanged();
+    void typeIdChanged();
 
 private:
     ErlNifPid *m_pid = nullptr;
-    QString m_identifier;
+    QString m_typeId;
     QObject *m_metaObjectSpy = nullptr;
     static Application *s_spplication;
     friend class Application;

@@ -65,7 +65,7 @@ Kirigami.ApplicationWindow {
             title: "Hello"
             ElixirChannel {
                 id: elixirChannel
-                identifier: "elixirTestChannel"
+                typeId: "elixirTestChannel"
                 property alias test: textField.text
                 signal testSignal(string param1, string param2)
             }

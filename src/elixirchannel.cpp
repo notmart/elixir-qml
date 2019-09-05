@@ -50,7 +50,7 @@ void ElixirChannel::componentComplete()
     for (int i = 0; i < metaObject()->propertyCount(); ++i) {
         const QMetaProperty p = metaObject()->property(i);
 
-        if (p.name() != "identifier" && p.hasNotifySignal()) {
+        if (p.name() != "typeId" && p.hasNotifySignal()) {
             QString capNotifySignal = p.notifySignal().name();
             capNotifySignal[0] = capNotifySignal[0].toUpper();
 
@@ -67,7 +67,7 @@ void ElixirChannel::componentComplete()
     for (int i = 0; i < metaObject()->methodCount(); ++i) {
         const QMetaMethod m = metaObject()->method(i);
         if (m.methodType() == QMetaMethod::Signal &&
-            m.name() != "identifier" &&
+            m.name() != "typeId" &&
             m.name() != "destroyed" &&
             !propertySignals.contains(m.name()) &&
             !methods.contains(m.name())) {
@@ -113,22 +113,22 @@ ErlNifPid *ElixirChannel::pid() const
     return m_pid;
 }
 
-void ElixirChannel::setIdentifier(const QString &identifier)
+void ElixirChannel::setTypeId(const QString &typeId)
 {
-    if (m_identifier == identifier) {
+    if (m_typeId == typeId) {
         return;
     }
 
     //ability to change it on the fly?
-    m_identifier = identifier;
-    Application::self()->registerElixirChannel(identifier, this);
+    m_typeId = typeId;
+    Application::self()->registerElixirChannel(typeId, this);
 
-    emit identifierChanged();
+    emit typeIdChanged();
 }
 
-QString ElixirChannel::identifier() const
+QString ElixirChannel::typeId() const
 {
-    return m_identifier;
+    return m_typeId;
 }
 
 
