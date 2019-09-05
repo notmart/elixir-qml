@@ -8,7 +8,7 @@ defmodule TestChannelManager do
 end
 
 defmodule ElixirTestChannel do
-    use QML.ChannelOperations
+    use QML.Channel
 
     def signal(name, params) do
         IO.puts "On ElixirTestChannel signal"
@@ -28,7 +28,7 @@ defmodule ExampleApp do
  
   def start(_type, _args) do
     children = [
-        {QML.Application, {TestChannelManager, "minimal.qml"}}
+        {QML.ApplicationServer, {TestChannelManager, "minimal.qml"}}
     ]
  
     opts = [strategy: :one_for_one, name: Sample.Supervisor]

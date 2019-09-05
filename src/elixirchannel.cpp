@@ -140,9 +140,9 @@ void ElixirChannel::sendProperty(const QString &property, const QVariant &value)
 
     ErlNifEnv* env = enif_alloc_env();
 
-    // enif_send(NULL, m_pid, env, nifpp::make(env,  std::make_tuple(nifpp::str_atom("$gen_call"), std::make_tuple(nifpp::str_atom("property"), std::string("test"), std::string(m_test.toUtf8().constData())))));
+    // enif_send(NULL, m_pid, env, nifpp::make(env,  std::make_tuple(nifpp::str_atom("$gen_call"), std::make_tuple(nifpp::str_atom("property"), std::string("test"), std::string(value.toString().toUtf8().constData())))));
 
-    enif_send(NULL, m_pid, env, nifpp::make(env,  std::make_tuple(nifpp::str_atom("property"), std::string(property.toUtf8().constData()), std::string(value.toString().toUtf8().constData()))));
+    enif_send(NULL, m_pid, env, nifpp::make(env,  std::make_tuple(nifpp::str_atom("propertyFromQml"), std::string(property.toUtf8().constData()), std::string(value.toString().toUtf8().constData()))));
 
     enif_free_env(env);
 }
@@ -155,7 +155,7 @@ void ElixirChannel::sendSignal(const QString &name, const QVariant &params)
 
     ErlNifEnv* env = enif_alloc_env();
 
-    enif_send(NULL, m_pid, env, nifpp::make(env,  std::make_tuple(nifpp::str_atom("signal"), std::string(name.toUtf8().constData()), std::string(params.toString().toUtf8().constData()))));
+    enif_send(NULL, m_pid, env, nifpp::make(env,  std::make_tuple(nifpp::str_atom("signalFromQml"), std::string(name.toUtf8().constData()), std::string(params.toString().toUtf8().constData()))));
 
     enif_free_env(env);
 }

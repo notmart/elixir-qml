@@ -14,7 +14,7 @@ defmodule QML.Mixfile do
   use Mix.Project
 
   def project do
-    [app: :ringbuffer,
+    [app: :qml,
      version: "0.1.0",
      elixir: "~> 1.4",
      build_embedded: Mix.env == :prod,
@@ -31,7 +31,7 @@ defmodule QML.Mixfile do
   end
 
   def package do
-    [name: :ringbuffer,
+    [name: :qml,
      maintainers: ["Marco Martin"],
      licenses: ["LGPL2"],
      links: %{"GitHub" => "https://github.com/notmart/elixir-qml",

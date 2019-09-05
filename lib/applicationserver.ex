@@ -1,4 +1,4 @@
-defmodule QML.Application do
+defmodule QML.ApplicationServer do
     use GenServer
 
     alias QML.Private
@@ -28,8 +28,8 @@ defmodule QML.Application do
 
     def handle_info({:channel_registered, identifier}, {:loading, channelManager, file, guiPid}) do
         #__MODULE__.channel_registered identifier
-        operations = channelManager.channelForType identifier
-        QML.Channel.start_link({identifier, operations})
+        qmlChannel = channelManager.channelForType identifier
+        QML.ChannelServer.start_link({identifier, qmlChannel})
         IO.inspect identifier
         {:noreply, {:loading, channelManager, file, guiPid}}
     end
