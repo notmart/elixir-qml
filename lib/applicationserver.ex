@@ -36,9 +36,10 @@ defmodule QML.ApplicationServer do
         qmlChannel = channelManager.channelForType typeId
         #QML.ChannelServer.start_link({identifier, qmlChannel})
         
-        DynamicSupervisor.start_child(QML.ChannelSupervisor, {QML.ChannelServer, {identifier, qmlChannel}})
+        {:ok, channel} = DynamicSupervisor.start_child(QML.ChannelSupervisor, {QML.ChannelServer, {identifier, qmlChannel}})
         
         IO.inspect identifier
+        IO.inspect channel
         {:noreply, {:loading, channelManager, file, guiPid}}
     end
 

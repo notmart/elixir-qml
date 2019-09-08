@@ -24,7 +24,7 @@ defmodule QML.Private do
     "QML NIF library not loaded"
   end
 
-  def process_events do
+  def write_property(_identifier, _property, _value) do
     "QML NIF library not loaded"
   end
   

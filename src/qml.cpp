@@ -60,6 +60,30 @@ static ERL_NIF_TERM register_qml_channel(ErlNifEnv* env, int argc, const ERL_NIF
     return argv[0];
 }
 
+static ERL_NIF_TERM write_property(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
+{
+    if (!s_application) {
+        return argv[0];
+    }
+
+    if (argc != 3) {
+        return enif_make_badarg(env);
+    }
+
+    int channelId;
+    enif_get_int(env, argv[0], &channelId);
+
+    std::string property = nifpp::get<std::string>(env, argv[1]);
+    //TODO: support multiple types
+    QString value = QString::fromUtf8(nifpp::get<std::string>(env, argv[2]).c_str());
+
+    auto *channel = s_application->channel(channelId);
+    if (channel) {
+        channel->setProperty(property.c_str(), value);
+    }
+    return argv[0];
+}
+
 static ERL_NIF_TERM hello(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
 {
     if (!s_application) {
@@ -72,6 +96,10 @@ static ERL_NIF_TERM hello(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
 
 static ERL_NIF_TERM exec(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
 {
+    if (s_application) {
+        qWarning() << "QApplication already running";
+        return argv[0];
+    }
     qWarning() << "CALLING EXEC!";
     if (argc != 1) {
         return enif_make_badarg(env);
@@ -99,6 +127,7 @@ static ErlNifFunc nif_funcs[] =
     {"hello", 0, hello},
     {"register_application_server", 0, register_application_server},
     {"register_qml_channel", 1, register_qml_channel},
+    {"write_property", 3, write_property},
     {"exec", 1, exec, ERL_NIF_DIRTY_JOB_CPU_BOUND }
 };
 

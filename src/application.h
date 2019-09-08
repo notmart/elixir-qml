@@ -47,6 +47,8 @@ public:
     bool registerQmlChannel(int identifier, ErlNifPid *pid);
     bool registerElixirChannel(int identifier, const QString &typeId, ElixirChannel *elixirChannel);
 
+    ElixirChannel *channel(int identifier) const;
+
     int exec(const QString &path);
 
     Q_INVOKABLE void send(const QString &text);

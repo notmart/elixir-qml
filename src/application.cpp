@@ -106,6 +106,11 @@ bool Application::registerElixirChannel(int identifier, const QString &typeId, E
     });
 }
 
+ElixirChannel *Application::channel(int identifier) const
+{
+    return m_qmlElixirChannels.value(identifier);
+}
+
 void Application::send(const QString &text)
 {
     ErlNifEnv* env = enif_alloc_env();
