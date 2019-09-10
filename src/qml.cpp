@@ -79,7 +79,7 @@ static ERL_NIF_TERM write_property(ErlNifEnv* env, int argc, const ERL_NIF_TERM 
 
     auto *channel = s_application->channel(channelId);
     if (channel) {
-        channel->setProperty(property.c_str(), value);
+        channel->bridge()->receiveProperty(property.c_str(), value);
     }
     return argv[0];
 }

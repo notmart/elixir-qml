@@ -197,5 +197,9 @@ QString ElixirChannel::typeId() const
     return m_typeId;
 }
 
+PropertyBridge *ElixirChannel::bridge() const
+{
+    return m_propertyBridge;
+}
 
 #include "moc_elixirchannel.cpp"

@@ -70,6 +70,8 @@ public:
     void setTypeId(const QString &typeId);
     QString typeId() const;
 
+    PropertyBridge *bridge() const;
+
 protected:
     void classBegin() override;
     void componentComplete() override;
