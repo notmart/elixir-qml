@@ -6,16 +6,19 @@ defmodule TestChannelManager do
         ElixirTestChannel
     end
 end
-
+#guardare Phoenix liveview
 defmodule ElixirTestChannel do
     use QML.Channel
 
+    #phoenix liveview come idea
+    #apply per invocare segnali
     def signal(name, params) do
         IO.puts "On ElixirTestChannel signal"
         IO.puts name
         IO.puts params
     end
-
+    #pub/subscribe
+    #qinvokable->chimate
     def propertyChanged(name, value) do
         IO.puts "On ElixirTestChannel propertyChanged"
         IO.puts name

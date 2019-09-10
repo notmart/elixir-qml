@@ -29,6 +29,112 @@
 
 int ElixirChannel::s_maxIdentifier = 0;
 
+PropertyBridge::PropertyBridge(ElixirChannel *parent)
+    : QObject(parent),
+      m_channel(parent)
+{
+    connect(this, &PropertyBridge::receiveProperty, this, &PropertyBridge::propertyReceived);
+
+    // Ugly generated QML wrapper for instrading properties
+    QString qml = QStringLiteral("import QtQuick 2.10\n"
+                                 "QtObject {"
+                                      "property QtObject parent;"
+                                      "property QtObject channel;");
+    QSet<QByteArray> propertySignals;
+    for (int i = 0; i < m_channel->metaObject()->propertyCount(); ++i) {
+        const QMetaProperty p = m_channel->metaObject()->property(i);
+
+        if (p.name() != "typeId" && p.hasNotifySignal()) {
+            QString capNotifySignal = p.notifySignal().name();
+            capNotifySignal[0] = capNotifySignal[0].toUpper();
+
+            qml += QStringLiteral("property var ") + p.name() + ": channel." + p.name()+"; ";
+            qml += QStringLiteral("on") + capNotifySignal + ": parent.sendProperty(\"" + p.name() + "\", channel." + p.name() + "); ";
+
+            propertySignals.insert(p.notifySignal().name());
+        }
+        sendProperty(p.name(), p.read(m_channel));
+    }
+
+    QSet<QByteArray> methods;
+    qml += QStringLiteral("Component.onCompleted: {");
+    for (int i = 0; i < m_channel->metaObject()->methodCount(); ++i) {
+        const QMetaMethod m = m_channel->metaObject()->method(i);
+        if (m.methodType() == QMetaMethod::Signal &&
+            m.name() != "typeId" &&
+            m.name() != "destroyed" &&
+            !propertySignals.contains(m.name()) &&
+            !methods.contains(m.name())) {
+
+            qml += QStringLiteral("channel.") + m.name() + ".connect(function(){parent.sendSignal(\"" + m.name() + "\", {});});";
+
+            methods.insert(m.name());
+        }
+    }
+
+    qml += QStringLiteral("}}");
+
+    qWarning() << qml;
+    QQmlEngine *engine = qmlEngine(m_channel);
+    QQmlContext *context = qmlContext(m_channel);
+    Q_ASSERT(engine);
+    Q_ASSERT(context);
+
+    QQmlComponent spyComponent(engine);
+    spyComponent.setData(qml.toUtf8(), QUrl());
+    m_metaObjectSpy = spyComponent.beginCreate(context);
+    Q_ASSERT(m_metaObjectSpy);
+    m_metaObjectSpy->setProperty("parent", QVariant::fromValue(this));
+    m_metaObjectSpy->setProperty("channel", QVariant::fromValue(m_channel));
+    spyComponent.completeCreate();
+    qWarning()<<"AAAAAAA";
+}
+
+PropertyBridge::~PropertyBridge()
+{
+}
+
+void PropertyBridge::propertyReceived(const QString &property, const QVariant &value)
+{
+    m_channel->setProperty(property.toUtf8(), value);
+}
+
+void PropertyBridge::sendProperty(const QString &property, const QVariant &value)
+{
+    if (!m_channel->pid()) {
+        return;
+    }
+
+    ErlNifEnv* env = enif_alloc_env();
+
+    //enif_send(NULL, m_channel->pid(), env, nifpp::make(env,  std::make_tuple(nifpp::str_atom("$gen_call"), std::make_tuple(nifpp::str_atom("property"), std::string("test"), std::string(value.toString().toUtf8().constData())))));
+
+    enif_send(NULL, m_channel->pid(), env, nifpp::make(env,  std::make_tuple(nifpp::str_atom("changeProperty"),
+        std::string(property.toUtf8().constData()),
+        std::string(value.toString().toUtf8().constData()))));
+
+    enif_free_env(env);
+}
+
+void PropertyBridge::sendSignal(const QString &name, const QVariant &params)
+{
+    if (!m_channel->pid()) {
+        return;
+    }
+
+    ErlNifEnv* env = enif_alloc_env();
+
+    enif_send(NULL, m_channel->pid(), env, nifpp::make(env,  std::make_tuple(nifpp::str_atom("signalFromQml"),
+        std::string(name.toUtf8().constData()),
+        std::string(params.toString().toUtf8().constData()))));
+
+    enif_free_env(env);
+}
+
+
+
+///////////////////////////////////////////////
+
 ElixirChannel::ElixirChannel(QObject *parent)
     : QObject(parent)
 {
@@ -45,55 +151,7 @@ void ElixirChannel::classBegin()
 
 void ElixirChannel::componentComplete()
 {
-    QString qml = QStringLiteral("import QtQuick 2.10\n"
-                                 "QtObject {"
-                                      "property QtObject parent;");
-    QSet<QByteArray> propertySignals;
-    for (int i = 0; i < metaObject()->propertyCount(); ++i) {
-        const QMetaProperty p = metaObject()->property(i);
-
-        if (p.name() != "typeId" && p.hasNotifySignal()) {
-            QString capNotifySignal = p.notifySignal().name();
-            capNotifySignal[0] = capNotifySignal[0].toUpper();
-
-            qml += QStringLiteral("property var ") + p.name() + ": parent." + p.name()+"; ";
-            qml += QStringLiteral("on") + capNotifySignal + ": parent.sendProperty(\"" + p.name() + "\", parent." + p.name() + "); ";
-
-            propertySignals.insert(p.notifySignal().name());
-        }
-        sendProperty(p.name(), p.read(this));
-    }
-
-    QSet<QByteArray> methods;
-    qml += QStringLiteral("Component.onCompleted: {");
-    for (int i = 0; i < metaObject()->methodCount(); ++i) {
-        const QMetaMethod m = metaObject()->method(i);
-        if (m.methodType() == QMetaMethod::Signal &&
-            m.name() != "typeId" &&
-            m.name() != "destroyed" &&
-            !propertySignals.contains(m.name()) &&
-            !methods.contains(m.name())) {
-
-            qml += QStringLiteral("parent.") + m.name() + ".connect(function(){parent.sendSignal(\"" + m.name() + "\", {});});";
-
-            methods.insert(m.name());
-        }
-    }
-
-    qml += QStringLiteral("}}");
-
-    qWarning() << qml;
-    QQmlEngine *engine = qmlEngine(this);
-    QQmlContext *context = qmlContext(this);
-    Q_ASSERT(engine);
-    Q_ASSERT(context);
-
-    QQmlComponent spyComponent(engine);
-    spyComponent.setData(qml.toUtf8(), QUrl());
-    m_metaObjectSpy = spyComponent.beginCreate(context);
-    Q_ASSERT(m_metaObjectSpy);
-    m_metaObjectSpy->setProperty("parent", QVariant::fromValue(this));
-    spyComponent.completeCreate();    
+    m_propertyBridge = new PropertyBridge(this);  
 }
 
 void ElixirChannel::setPid(ErlNifPid *pid)
@@ -104,9 +162,11 @@ void ElixirChannel::setPid(ErlNifPid *pid)
 
     m_pid = pid;
 
-    for (int i = 0; i < metaObject()->propertyCount(); ++i) {
-        const QMetaProperty p = metaObject()->property(i);
-        sendProperty(p.name(), p.read(this));
+    if (m_propertyBridge) {
+        for (int i = 0; i < metaObject()->propertyCount(); ++i) {
+            const QMetaProperty p = metaObject()->property(i);
+            m_propertyBridge->sendProperty(p.name(), p.read(this));
+        }
     }
 }
 
@@ -135,48 +195,6 @@ void ElixirChannel::setTypeId(const QString &typeId)
 QString ElixirChannel::typeId() const
 {
     return m_typeId;
-}
-
-
-void ElixirChannel::sendProperty(const QString &property, const QVariant &value)
-{
-    if (!m_pid) {
-        return;
-    }
-
-    ErlNifEnv* env = enif_alloc_env();
-
-    //enif_send(NULL, m_pid, env, nifpp::make(env,  std::make_tuple(nifpp::str_atom("$gen_call"), std::make_tuple(nifpp::str_atom("property"), std::string("test"), std::string(value.toString().toUtf8().constData())))));
-
-    enif_send(NULL, m_pid, env, nifpp::make(env,  std::make_tuple(nifpp::str_atom("changeProperty"),
-        std::string(property.toUtf8().constData()),
-        std::string(value.toString().toUtf8().constData()))));
-
-    enif_free_env(env);
-}
-
-void ElixirChannel::sendSignal(const QString &name, const QVariant &params)
-{
-    if (!m_pid) {
-        return;
-    }
-
-    ErlNifEnv* env = enif_alloc_env();
-
-    enif_send(NULL, m_pid, env, nifpp::make(env,  std::make_tuple(nifpp::str_atom("signalFromQml"),
-        std::string(name.toUtf8().constData()),
-        std::string(params.toString().toUtf8().constData()))));
-
-    enif_free_env(env);
-}
-
-void ElixirChannel::send(const QString &text)
-{
-    ErlNifEnv* env = enif_alloc_env();
-
-    enif_send(NULL, m_pid, env, nifpp::make(env, std::string(text.toUtf8().constData())));
-
-    enif_free_env(env);
 }
 
 

@@ -28,6 +28,29 @@
 class QQuickItem;
 
 class Application;
+class ElixirChannel;
+
+class PropertyBridge : public QObject
+{
+    Q_OBJECT
+
+public:
+    PropertyBridge(ElixirChannel *parent);
+    ~PropertyBridge();
+
+    Q_INVOKABLE void sendProperty(const QString &property, const QVariant &value);
+    Q_INVOKABLE void sendSignal(const QString &name, const QVariant &params);
+
+Q_SIGNALS:
+    //hack done to write properties always from the gui thread
+    void receiveProperty(const QString &property, const QVariant &value);
+
+private:
+    void propertyReceived(const QString &property, const QVariant &value);
+
+    QObject *m_metaObjectSpy = nullptr;
+    ElixirChannel *m_channel = nullptr;
+};   
 
 class ElixirChannel : public QObject, public QQmlParserStatus
 {
@@ -47,12 +70,6 @@ public:
     void setTypeId(const QString &typeId);
     QString typeId() const;
 
-    Q_INVOKABLE void send(const QString &text);
-
-    //TODO: put in an internal object not accessible from QML
-    Q_INVOKABLE void sendProperty(const QString &property, const QVariant &value);
-    Q_INVOKABLE void sendSignal(const QString &name, const QVariant &params);
-
 protected:
     void classBegin() override;
     void componentComplete() override;
@@ -65,9 +82,8 @@ private:
     ErlNifPid *m_pid = nullptr;
     QString m_typeId;
     int m_identifier;
-    QObject *m_metaObjectSpy = nullptr;
     static Application *s_spplication;
-    friend class Application;
+    PropertyBridge *m_propertyBridge = nullptr;
 
     static int s_maxIdentifier;
 };
