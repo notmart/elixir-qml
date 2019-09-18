@@ -67,7 +67,8 @@ Kirigami.ApplicationWindow {
                 id: elixirChannel
                 typeId: "elixirTestChannel"
                 property alias test: textField.text
-                signal testSignal(string param1, string param2)
+                signal testSignal(string param1, int param2)
+                signal missingSignal(string param1, string param2)
             }
             ColumnLayout {
                 Controls.Label {
@@ -75,7 +76,11 @@ Kirigami.ApplicationWindow {
                 }
                 Controls.Button {
                     text: "Say Hello"
-                    onClicked: elixirChannel.testSignal("First param", "second param")
+                    onClicked: elixirChannel.testSignal("First param", 123)
+                }
+                Controls.Button {
+                    text: "Say Hello2"
+                    onClicked: elixirChannel.missingSignal("First param", "second param")
                 }
                 Controls.TextField {
                     id: textField

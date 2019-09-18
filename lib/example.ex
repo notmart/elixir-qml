@@ -36,7 +36,7 @@ defmodule ExampleApp do
  
  #TODO: not a supervisor, but when it dies, kill the whole VM?
  #or rebuild everything, but recycling the same QApplication instance if possible
-    opts = [strategy: :one_for_one, name: Sample.Supervisor, restart: :temporary, max_restarts: 0]
+    opts = [strategy: :one_for_one, name: Sample.Supervisor]
     Supervisor.start_link(children, opts)
   end
 end

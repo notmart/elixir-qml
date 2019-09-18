@@ -9,10 +9,13 @@ defmodule QML.ApplicationServer do
 
     def init({channelManager, file}) do
         Private.register_application_server
-        guiPid = spawn(fn ->
-            Private.exec(file)
-            :init.stop
-        end)
+        guiPid = Process.whereis(:qApplicationProcess)
+            || spawn(fn ->
+                Private.exec(file)
+                :init.stop
+            end)
+
+        Process.register(guiPid, :qApplicationProcess)
 
         children = [
             {DynamicSupervisor, strategy: :one_for_one, name: QML.ChannelSupervisor}

@@ -60,10 +60,6 @@ Application::~Application()
 
 bool Application::registerQmlChannel(int identifier, ErlNifPid *pid)
 {
-    if (m_elixirQmlChannels.contains(identifier)) {
-        return false;
-    }
-
     m_elixirQmlChannels[identifier] = pid;
 
     if (m_qmlElixirChannels.contains(identifier)) {
