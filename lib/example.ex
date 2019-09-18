@@ -11,11 +11,11 @@ defmodule ElixirTestChannel do
     use QML.Channel
 
     #phoenix liveview come idea
-    #apply per invocare segnali
-    def signal(name, params) do
-        IO.puts "On ElixirTestChannel signal"
-        IO.puts name
-        IO.puts params
+
+    def testSignal(param1, param2) do
+        IO.puts "On ElixirTestChannel testSignal"
+        IO.puts param1
+        IO.puts param2
     end
     #pub/subscribe
     #qinvokable->chimate

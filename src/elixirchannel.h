@@ -39,7 +39,7 @@ public:
     ~PropertyBridge();
 
     Q_INVOKABLE void sendProperty(const QString &property, const QVariant &value);
-    Q_INVOKABLE void sendSignal(const QString &name, const QVariant &params);
+    Q_INVOKABLE void sendSignal(const QString &name, const QVariantList &params);
 
 Q_SIGNALS:
     //hack done to write properties always from the gui thread

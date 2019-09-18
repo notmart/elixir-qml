@@ -66,7 +66,25 @@ PropertyBridge::PropertyBridge(ElixirChannel *parent)
             !propertySignals.contains(m.name()) &&
             !methods.contains(m.name())) {
 
-            qml += QStringLiteral("channel.") + m.name() + ".connect(function(){parent.sendSignal(\"" + m.name() + "\", {});});";
+            qml += QStringLiteral("channel.") + m.name() + ".connect(function(";
+            bool first = true;
+            for (const auto &p : m.parameterNames()) {
+                if (!first) {
+                    qml += QStringLiteral(",");
+                }
+                first = false;
+                qml += QString(p);
+            }
+            qml += "){parent.sendSignal(\"" + m.name() + "\", [";
+            first = true;
+            for (const auto &p : m.parameterNames()) {
+                if (!first) {
+                    qml += QStringLiteral(",");
+                }
+                first = false;
+                qml += QString(p);
+            }
+            qml += "]);});";
 
             methods.insert(m.name());
         }
@@ -122,7 +140,7 @@ void PropertyBridge::sendProperty(const QString &property, const QVariant &value
     enif_free_env(env);
 }
 
-void PropertyBridge::sendSignal(const QString &name, const QVariant &params)
+void PropertyBridge::sendSignal(const QString &name, const QVariantList &params)
 {
     if (!m_channel->pid()) {
         return;
@@ -132,7 +150,7 @@ void PropertyBridge::sendSignal(const QString &name, const QVariant &params)
 
     enif_send(NULL, m_channel->pid(), env, nifpp::make(env,  std::make_tuple(nifpp::str_atom("signalFromQml"),
         name,
-        params)));
+        params.toStdList())));
 
     enif_free_env(env);
 }

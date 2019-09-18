@@ -7,7 +7,7 @@ defmodule QML.Channel do
     end
 
     
-    @callback signal(arg :: String.t(), arg :: any) :: none
+    #@callback signal(arg :: String.t(), arg :: any) :: none
     @callback propertyChanged(arg :: String.t(), arg :: any) :: none
 end
 
