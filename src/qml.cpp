@@ -84,16 +84,6 @@ static ERL_NIF_TERM write_property(ErlNifEnv* env, int argc, const ERL_NIF_TERM 
     return argv[0];
 }
 
-static ERL_NIF_TERM hello(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
-{
-    if (!s_application) {
-        return argv[0];
-    }
-    qWarning() << "WASSSUUUUUP!";
-    s_application->setProperty("test", "HELLO FROM ELIXIR");
-    return enif_make_string(env, "Hello world!", ERL_NIF_LATIN1);
-}
-
 static ERL_NIF_TERM exec(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
 {
     if (s_application) {
@@ -124,7 +114,6 @@ static ERL_NIF_TERM exec(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
 
 static ErlNifFunc nif_funcs[] =
 {
-    {"hello", 0, hello},
     {"register_application_server", 0, register_application_server},
     {"register_qml_channel", 1, register_qml_channel},
     {"write_property", 3, write_property},

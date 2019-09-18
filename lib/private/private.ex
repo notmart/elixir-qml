@@ -8,10 +8,6 @@ defmodule QML.Private do
     :ok = unquote(app) |> :code.priv_dir |> :filename.join('qml') |> :erlang.load_nif(0) 
   end
 
-  def hello do
-    "QML NIF library not loaded"
-  end
-
   def register_application_server do
     "QML NIF library not loaded"
   end
