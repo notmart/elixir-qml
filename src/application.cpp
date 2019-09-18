@@ -88,7 +88,7 @@ bool Application::registerElixirChannel(int identifier, const QString &typeId, E
     enif_send(NULL, m_pid, env, nifpp::make(env,  
         std::make_tuple(nifpp::str_atom("channel_registered"),        
             identifier,
-            std::string(typeId.toUtf8().constData()))));
+            typeId)));
 
     enif_free_env(env);
 
@@ -100,7 +100,7 @@ bool Application::registerElixirChannel(int identifier, const QString &typeId, E
         enif_send(NULL, m_pid, env, nifpp::make(env,  
             std::make_tuple(nifpp::str_atom("channel_removed"), 
                 identifier,
-                std::string(typeId.toUtf8().constData()))));
+                typeId.toUtf8().constData())));
 
         enif_free_env(env);
     });
@@ -115,7 +115,7 @@ void Application::send(const QString &text)
 {
     ErlNifEnv* env = enif_alloc_env();
 
-    enif_send(NULL, m_pid, env, nifpp::make(env, std::string(text.toUtf8().constData())));
+    enif_send(NULL, m_pid, env, nifpp::make(env, text));
 
     enif_free_env(env);
 }
@@ -137,9 +137,9 @@ int Application::exec(const QString &path)
     connect(m_engine, &QQmlApplicationEngine::objectCreated, this, [this](QObject *object, const QUrl &url) {
         ErlNifEnv* env = enif_alloc_env();
         if (object) {
-            enif_send(NULL, m_pid, env, nifpp::make(env,  std::make_tuple(nifpp::str_atom("loaded"), std::string(url.toString().toUtf8()))));
+            enif_send(NULL, m_pid, env, nifpp::make(env,  std::make_tuple(nifpp::str_atom("loaded"), url.toString())));
         } else {
-            enif_send(NULL, m_pid, env, nifpp::make(env, std::make_tuple(nifpp::str_atom("error"), std::string(url.toString().toUtf8()))));
+            enif_send(NULL, m_pid, env, nifpp::make(env, std::make_tuple(nifpp::str_atom("error"), url.toString())));
         }
         enif_free_env(env);
     });

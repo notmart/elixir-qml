@@ -106,12 +106,18 @@ void PropertyBridge::sendProperty(const QString &property, const QVariant &value
     }
 
     ErlNifEnv* env = enif_alloc_env();
-
-    //enif_send(NULL, m_channel->pid(), env, nifpp::make(env,  std::make_tuple(nifpp::str_atom("$gen_call"), std::make_tuple(nifpp::str_atom("property"), std::string("test"), std::string(value.toString().toUtf8().constData())))));
-
+/*
+    enif_send(NULL, m_channel->pid(), env,
+        nifpp::make(env,
+            std::make_tuple(nifpp::str_atom("$gen_call"), 
+                std::make_tuple(
+                    nifpp::str_atom("property"),
+                    QStringLiteral("test"),
+                    value))));
+*/
     enif_send(NULL, m_channel->pid(), env, nifpp::make(env,  std::make_tuple(nifpp::str_atom("changeProperty"),
-        std::string(property.toUtf8().constData()),
-        std::string(value.toString().toUtf8().constData()))));
+        property,
+        value)));
 
     enif_free_env(env);
 }
@@ -125,8 +131,8 @@ void PropertyBridge::sendSignal(const QString &name, const QVariant &params)
     ErlNifEnv* env = enif_alloc_env();
 
     enif_send(NULL, m_channel->pid(), env, nifpp::make(env,  std::make_tuple(nifpp::str_atom("signalFromQml"),
-        std::string(name.toUtf8().constData()),
-        std::string(params.toString().toUtf8().constData()))));
+        name,
+        params)));
 
     enif_free_env(env);
 }

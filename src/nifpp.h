@@ -47,6 +47,10 @@
 #include <cassert>
 #include <cstring>
 
+// Qt
+#include <QString>
+#include <QVariant>
+
 namespace nifpp
 {
 
@@ -223,7 +227,6 @@ inline TERM make(ErlNifEnv *env, const str_atom &var)
 {
     return TERM(enif_make_atom(env, var.c_str()));
 }
-
 
 
 // std::string
@@ -577,6 +580,64 @@ template<class T, class U> resource_ptr<T> dynamic_pointer_cast(resource_ptr<U> 
     return dynamic_cast<T *>(p.get());
 }
 
+
+//////////////Qt
+inline int get(ErlNifEnv *env, ERL_NIF_TERM term, QString &var)
+{
+    // The implementation below iterates through the list twice.  It may
+    // be faster to iterate through the list and append bytes one at a time.
+
+    unsigned len;
+    int ret = enif_get_list_length(env, term, &len); // full list iteration
+    if(!ret)
+    {
+        // not a list, try as binary
+        ErlNifBinary bin;
+        ret = enif_inspect_binary(env, term, &bin);
+        if(!ret)
+        {
+            // not a binary either, so fail.
+            return 0;
+        }
+        var = QString(QByteArray((const char*)bin.data, bin.size));
+        return ret;
+    }
+    QByteArray buf;
+    buf.resize(len+1); // +1 for terminating null
+    ret =  enif_get_string(env, term, &*(buf.begin()), buf.size(), ERL_NIF_LATIN1); // full list iteration
+    if(ret > 0)
+    {
+        var.resize(ret-1); // trim terminating null
+    }
+    else if(ret==0)
+    {
+        var.resize(0);
+    }
+    else
+    {
+        // oops string somehow got truncated
+        // var is correct size so do nothing
+    }
+    return ret;
+}
+inline TERM make(ErlNifEnv *env, const QString &var)
+{
+    return nifpp::TERM(enif_make_string_len(env, var.toUtf8().data(), var.size(), ERL_NIF_LATIN1));
+}
+
+inline TERM make(ErlNifEnv *env, const QVariant &var)
+{
+    if (var.canConvert<QString>()) {
+        return make(env, var.toString());
+    } else if (var.canConvert<qreal>()) {
+        return make(env, var.toReal());
+    } else {
+        return make(env, 0);
+    }
+}
+
+
+///////resources
 
 namespace detail //(resource detail)
 {
@@ -1107,7 +1168,6 @@ void get_throws(ErlNifEnv *env, ERL_NIF_TERM term, T &t)
         throw badarg();
     }
 }
-
 
 } // namespace nifpp
 
