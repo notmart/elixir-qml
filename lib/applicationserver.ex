@@ -9,6 +9,7 @@ defmodule QML.ApplicationServer do
 
     def init({channelManager, file}) do
         Private.register_application_server
+        Process.register(self, :qmlApplicationServer)
         guiPid = Process.whereis(:qApplicationProcess)
             || spawn(fn ->
                 Private.exec(file)
