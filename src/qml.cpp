@@ -51,12 +51,12 @@ static ERL_NIF_TERM register_qml_channel(ErlNifEnv* env, int argc, const ERL_NIF
         return enif_make_badarg(env);
     }
 
-    int identifier;
-    enif_get_int(env, argv[0], &identifier);
+    //TODO: fix QString typeId = nifpp::get<QString>(env, argv[0]);
+    QString typeId = QString(nifpp::get<std::string>(env, argv[0]).data());
 
     ErlNifPid* pid = (ErlNifPid*) enif_alloc(sizeof(ErlNifPid));
     pid = enif_self(env, pid);
-    s_application->registerQmlChannel(identifier, pid);
+    s_application->registerQmlChannel(typeId, pid);
     return argv[0];
 }
 
@@ -70,14 +70,13 @@ static ERL_NIF_TERM write_property(ErlNifEnv* env, int argc, const ERL_NIF_TERM 
         return enif_make_badarg(env);
     }
 
-    int channelId;
-    enif_get_int(env, argv[0], &channelId);
+    QString typeId = QString(nifpp::get<std::string>(env, argv[0]).data());
 
     std::string property = nifpp::get<std::string>(env, argv[1]);
     //TODO: support multiple types
     QString value = QString::fromUtf8(nifpp::get<std::string>(env, argv[2]).c_str());
 
-    auto *channel = s_application->channel(channelId);
+    auto *channel = s_application->channel(typeId);
     if (channel) {
         channel->bridge()->receiveProperty(property.c_str(), value);
     }

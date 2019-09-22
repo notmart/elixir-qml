@@ -58,53 +58,53 @@ Application::~Application()
 {
 }
 
-bool Application::registerQmlChannel(int identifier, ErlNifPid *pid)
+bool Application::registerQmlChannel(const QString &typeId, ErlNifPid *pid)
 {
-    m_elixirQmlChannels[identifier] = pid;
+    m_elixirQmlChannels[typeId] = pid;
 
-    if (m_qmlElixirChannels.contains(identifier)) {
-        m_qmlElixirChannels[identifier]->setPid(pid);
+    if (m_qmlElixirChannels.contains(typeId)) {
+        m_qmlElixirChannels[typeId]->setPid(pid);
     }
 }
 
-bool Application::registerElixirChannel(int identifier, const QString &typeId, ElixirChannel *elixirChannel)
+bool Application::registerElixirChannel(const QString &typeId, ElixirChannel *elixirChannel)
 {
-    if (m_qmlElixirChannels.contains(identifier)) {
+    if (m_qmlElixirChannels.contains(typeId)) {
+        // TODO: is this too much? tough having a duplicate typeid is completely a no go
+        qFatal(QStringLiteral("ElixirChannel typeId not unique: %1").arg(typeId).toUtf8());
         return false;
     }
 
-    m_qmlElixirChannels[identifier] = elixirChannel;
+    m_qmlElixirChannels[typeId] = elixirChannel;
 
-    if (m_elixirQmlChannels.contains(identifier)) {
-        elixirChannel->setPid(m_elixirQmlChannels[identifier]);
+    if (m_elixirQmlChannels.contains(typeId)) {
+        elixirChannel->setPid(m_elixirQmlChannels[typeId]);
     }
 
     ErlNifEnv* env = enif_alloc_env();
 
     enif_send(NULL, m_pid, env, nifpp::make(env,  
         std::make_tuple(nifpp::str_atom("channel_registered"),        
-            identifier,
             typeId)));
 
     enif_free_env(env);
 
-    connect(elixirChannel, &QObject::destroyed, this, [this, identifier, typeId]() {
-        m_qmlElixirChannels.remove(identifier);
+    connect(elixirChannel, &QObject::destroyed, this, [this, typeId]() {
+        m_qmlElixirChannels.remove(typeId);
 
         ErlNifEnv* env = enif_alloc_env();
 
         enif_send(NULL, m_pid, env, nifpp::make(env,  
             std::make_tuple(nifpp::str_atom("channel_removed"), 
-                identifier,
                 typeId.toUtf8().constData())));
 
         enif_free_env(env);
     });
 }
 
-ElixirChannel *Application::channel(int identifier) const
+ElixirChannel *Application::channel(const QString &typeId) const
 {
-    return m_qmlElixirChannels.value(identifier);
+    return m_qmlElixirChannels.value(typeId);
 }
 
 void Application::send(const QString &text)
@@ -119,6 +119,8 @@ void Application::send(const QString &text)
 int Application::exec(const QString &path)
 {
     int num=1;
+
+    // TODO: App name from Elixir
     QApplication app(num, makeArgV(num, "App"));
     if (!m_engine) {
         m_engine = new QQmlApplicationEngine(this);

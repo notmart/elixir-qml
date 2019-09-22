@@ -83,10 +83,10 @@ Q_SIGNALS:
 private:
     ErlNifPid *m_pid = nullptr;
     QString m_typeId;
-    int m_identifier;
+    int m_unnamedId;
     static Application *s_spplication;
     PropertyBridge *m_propertyBridge = nullptr;
 
-    static int s_maxIdentifier;
+    static int s_maxUnnamedId;
 };
 

@@ -27,7 +27,8 @@
 #include <QQmlComponent>
 #include <QDebug>
 
-int ElixirChannel::s_maxIdentifier = 0;
+int ElixirChannel::s_maxUnnamedId = 0;
+
 
 PropertyBridge::PropertyBridge(ElixirChannel *parent)
     : QObject(parent),
@@ -130,7 +131,7 @@ void PropertyBridge::sendProperty(const QString &property, const QVariant &value
             std::make_tuple(nifpp::str_atom("$gen_call"), 
                 std::make_tuple(
                     nifpp::str_atom("property"),
-                    QStringLiteral("test"),
+                    property,
                     value))));
 */
     enif_send(NULL, m_channel->pid(), env, nifpp::make(env,  std::make_tuple(nifpp::str_atom("changeProperty"),
@@ -162,7 +163,6 @@ void PropertyBridge::sendSignal(const QString &name, const QVariantList &params)
 ElixirChannel::ElixirChannel(QObject *parent)
     : QObject(parent)
 {
-    m_identifier = s_maxIdentifier++;
 }
 
 ElixirChannel::~ElixirChannel()
@@ -175,7 +175,13 @@ void ElixirChannel::classBegin()
 
 void ElixirChannel::componentComplete()
 {
-    m_propertyBridge = new PropertyBridge(this);  
+    m_propertyBridge = new PropertyBridge(this);
+
+    if (m_typeId.isEmpty()) {
+        qFatal("Empty ElixirChannel typeId");
+    }
+
+    Application::self()->registerElixirChannel(m_typeId, this);
 }
 
 void ElixirChannel::setPid(ErlNifPid *pid)
@@ -209,9 +215,7 @@ void ElixirChannel::setTypeId(const QString &typeId)
         return;
     }
 
-    //ability to change it on the fly?
     m_typeId = typeId;
-    Application::self()->registerElixirChannel(m_identifier, typeId, this);
 
     emit typeIdChanged();
 }

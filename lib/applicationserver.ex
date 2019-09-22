@@ -8,8 +8,12 @@ defmodule QML.ApplicationServer do
     end
 
     def init({channelManager, file}) do
+        # Only an ApplicationServer can run at once
+        nil = Process.whereis(:qmlApplicationServer)
         Private.register_application_server
-        Process.register(self, :qmlApplicationServer)
+
+        Process.register(self(), :qmlApplicationServer)
+
         guiPid = Process.whereis(:qApplicationProcess)
             || spawn(fn ->
                 Private.exec(file)
@@ -36,19 +40,18 @@ defmodule QML.ApplicationServer do
         {:stop, :normal, state}
     end
 
-    def handle_info({:channel_registered, identifier, typeId}, {:loading, channelManager, file, guiPid}) do
+    def handle_info({:channel_registered, typeId}, {:loading, channelManager, file, guiPid}) do
         qmlChannel = channelManager.channelForType typeId
-        #QML.ChannelServer.start_link({identifier, qmlChannel})
         
-        {:ok, channel} = DynamicSupervisor.start_child(QML.ChannelSupervisor, {QML.ChannelServer, {identifier, qmlChannel}})
+        {:ok, channel} = DynamicSupervisor.start_child(QML.ChannelSupervisor, {QML.ChannelServer, {typeId, qmlChannel}})
         
-        IO.inspect identifier
+        IO.inspect typeId
         IO.inspect channel
         {:noreply, {:loading, channelManager, file, guiPid}}
     end
 
-    def handle_info({:channel_unregistered, identifier}, {:loading, channelManager, file, guiPid}) do
-        #DynamicSupervisor.terminate_child(QML.ChannelSupervisor, map pids for identifier)
+    def handle_info({:channel_unregistered, typeId}, {:loading, channelManager, file, guiPid}) do
+        #DynamicSupervisor.terminate_child(QML.ChannelSupervisor, map pids for typeId)
         {:noreply, {:loading, channelManager, file, guiPid}}
     end
 
@@ -57,5 +60,9 @@ defmodule QML.ApplicationServer do
         IO.puts "info"
         IO.inspect message
         {:noreply, state}
+    end
+
+    def process do
+        Process.whereis(:qmlApplicationServer)
     end
 end

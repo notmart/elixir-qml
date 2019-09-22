@@ -44,10 +44,10 @@ public:
 
     static Application *self();
 
-    bool registerQmlChannel(int identifier, ErlNifPid *pid);
-    bool registerElixirChannel(int identifier, const QString &typeId, ElixirChannel *elixirChannel);
+    bool registerQmlChannel(const QString &typeId, ErlNifPid *pid);
+    bool registerElixirChannel(const QString &typeId, ElixirChannel *elixirChannel);
 
-    ElixirChannel *channel(int identifier) const;
+    ElixirChannel *channel(const QString &typeId) const;
 
     int exec(const QString &path);
 
@@ -63,8 +63,8 @@ private:
 
     // Keus must correspond
     // pids of the elixir-side QmlChannel
-    QHash<int, ErlNifPid *> m_elixirQmlChannels;
+    QHash<QString, ErlNifPid *> m_elixirQmlChannels;
     // QML-side ElixirChannel
-    QHash<int, ElixirChannel *>  m_qmlElixirChannels;
+    QHash<QString, ElixirChannel *>  m_qmlElixirChannels;
 };
 
