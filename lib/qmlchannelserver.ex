@@ -8,10 +8,12 @@ defmodule QML.ChannelServer do
     end
 
     def init({typeId, operations}) do
+        #channels must be unique per typeId
+        nil = Process.whereis(typeId)
+
         Private.register_qml_channel typeId
-        idAtom = typeId |> to_string |> String.to_atom
-        nil = Process.whereis(idAtom)
-        Process.register(self(), idAtom)
+
+        Process.register(self(), typeId)
         {:ok, {%{}, typeId, operations}}
     end
 

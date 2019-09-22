@@ -106,7 +106,6 @@ PropertyBridge::PropertyBridge(ElixirChannel *parent)
     m_metaObjectSpy->setProperty("parent", QVariant::fromValue(this));
     m_metaObjectSpy->setProperty("channel", QVariant::fromValue(m_channel));
     spyComponent.completeCreate();
-    qWarning()<<"AAAAAAA";
 }
 
 PropertyBridge::~PropertyBridge()
@@ -126,11 +125,14 @@ void PropertyBridge::sendProperty(const QString &property, const QVariant &value
 
     ErlNifEnv* env = enif_alloc_env();
 /*
+    ErlNifPid* pid = (ErlNifPid*) enif_alloc(sizeof(ErlNifPid));
+    pid = enif_self(env, pid);
     enif_send(NULL, m_channel->pid(), env,
         nifpp::make(env,
             std::make_tuple(nifpp::str_atom("$gen_call"), 
+                std::make_tuple(pid, enif_make_ref(env)),
                 std::make_tuple(
-                    nifpp::str_atom("property"),
+                    nifpp::str_atom("setProperty"),
                     property,
                     value))));
 */

@@ -85,7 +85,7 @@ bool Application::registerElixirChannel(const QString &typeId, ElixirChannel *el
 
     enif_send(NULL, m_pid, env, nifpp::make(env,  
         std::make_tuple(nifpp::str_atom("channel_registered"),        
-            typeId)));
+            nifpp::str_atom(typeId.toUtf8()))));
 
     enif_free_env(env);
 

@@ -1,7 +1,7 @@
 defmodule TestChannelManager do
     @behaviour QML.ChannelManager
 
-    def channelForType 'elixirTestChannel' do
+    def channelForType :elixirTestChannel do
         IO.puts "doing an elixirtestchannel"
         ElixirTestChannel
     end

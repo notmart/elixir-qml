@@ -52,7 +52,7 @@ static ERL_NIF_TERM register_qml_channel(ErlNifEnv* env, int argc, const ERL_NIF
     }
 
     //TODO: fix QString typeId = nifpp::get<QString>(env, argv[0]);
-    QString typeId = QString(nifpp::get<std::string>(env, argv[0]).data());
+    QString typeId = QString(nifpp::get<nifpp::str_atom>(env, argv[0]).data());
 
     ErlNifPid* pid = (ErlNifPid*) enif_alloc(sizeof(ErlNifPid));
     pid = enif_self(env, pid);
