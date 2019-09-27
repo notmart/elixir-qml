@@ -70,15 +70,22 @@ static ERL_NIF_TERM write_property(ErlNifEnv* env, int argc, const ERL_NIF_TERM 
         return enif_make_badarg(env);
     }
 
+
     nifpp::str_atom typeAtom;
-    nifpp::get(env, argv[0], typeAtom);
+    if (!nifpp::get(env, argv[0], typeAtom)) {
+        return enif_make_badarg(env);
+    };
     QString typeId = QString(typeAtom.data());
 
     QString property;
-    nifpp::get(env, argv[1], property);
+    if (!nifpp::get(env, argv[1], property)) {
+        return enif_make_badarg(env);
+    };
     //TODO: support multiple types
     QString value;
-    nifpp::get(env, argv[2], value);
+    if (!nifpp::get(env, argv[2], value)) {
+        return enif_make_badarg(env);
+    };
 
     auto *channel = s_application->channel(typeId);
     if (channel) {
