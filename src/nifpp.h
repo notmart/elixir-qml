@@ -50,7 +50,7 @@
 // Qt
 #include <QString>
 #include <QVariant>
-
+#include <QDebug>
 namespace nifpp
 {
 
@@ -198,6 +198,10 @@ template<typename TK, typename TV> TERM make(ErlNifEnv *env, const std::map<TK,T
 template<typename TK, typename TV> int get(ErlNifEnv *env, ERL_NIF_TERM term, std::unordered_map<TK,TV> &var);
 template<typename TK, typename TV> TERM make(ErlNifEnv *env, const std::unordered_map<TK,TV> &var);
 #endif
+
+// Qt
+template<typename T> int get(ErlNifEnv *env, ERL_NIF_TERM term, QList<T> &var);
+template<typename T> TERM make(ErlNifEnv *env, const QList<T> &var);
 
 // ERL_NIF_TERM
 inline int get(ErlNifEnv *, ERL_NIF_TERM term, TERM &var)
@@ -625,6 +629,42 @@ inline TERM make(ErlNifEnv *env, const QString &var)
     return nifpp::TERM(enif_make_string_len(env, var.toUtf8().data(), var.size(), ERL_NIF_LATIN1));
 }
 
+inline int get(ErlNifEnv *env, ERL_NIF_TERM term, QVariant &var)
+{
+    int ret = 0;
+    var.clear();
+    if (enif_is_atom(env, term)) {
+        str_atom val;
+        ret = get(env, term, val);
+        var.setValue<QString>(QString(val.c_str()));
+    } else if (enif_is_number(env, term)) {
+        qreal rVal;
+        int iVal;
+        unsigned int uVal;
+        ret = get(env, term, rVal);
+        if (ret) {
+            var.setValue<qreal>(rVal);
+        } else {
+            ret = get(env, term, iVal);
+            if (ret) {
+                var.setValue<int>(iVal);
+            } else {
+                ret = get(env, term, uVal);
+                var.setValue<unsigned int>(uVal);
+            }
+        }
+
+    //try a string
+    } else {
+        QString val;
+        ret = get(env, term, val);
+
+        var.setValue<QString>(val);
+    }
+
+    return ret;
+}
+
 inline TERM make(ErlNifEnv *env, const QVariant &var)
 {
     if (var.canConvert<QString>()) {
@@ -999,6 +1039,26 @@ int get(ErlNifEnv *env, ERL_NIF_TERM term, std::list<T> &var)
 }
 template<typename T>
 TERM make(ErlNifEnv *env, const std::list<T> &var)
+{
+    ERL_NIF_TERM tail;
+    tail = enif_make_list(env, 0);
+    for(auto i=var.rbegin(); i!=var.rend(); i++)
+    {
+        tail = enif_make_list_cell(env, make(env,*i), tail);
+    }
+    return TERM(tail);
+}
+
+
+// Qt
+template<typename T>
+int get(ErlNifEnv *env, ERL_NIF_TERM term, QList<T> &var)
+{
+    var.clear();
+    return list_for_each<T>(env, term, [&var](T item){var.push_back(item);});
+}
+template<typename T>
+TERM make(ErlNifEnv *env, const QList<T> &var)
 {
     ERL_NIF_TERM tail;
     tail = enif_make_list(env, 0);
