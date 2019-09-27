@@ -23,13 +23,6 @@ defmodule QML.ChannelServer do
         {:noreply, {map, typeId, operations}}
     end
 
-    def handle_info({:changeProperty, name, value}, {map, typeId, operations}) do
-        newMap = Map.put(map, name, value)
-        operations.propertyChanged(name, value)
-       # Private.write_property(typeId, name, value)
-        {:noreply, {newMap, typeId, operations}}
-    end
-
     def handle_call({:property, name}, _from, {map, typeId, operations}) do
         {:reply, Map.fetch(map, name), {map, typeId, operations}}
     end
@@ -51,6 +44,7 @@ defmodule QML.ChannelServer do
 
     def handle_cast({:setProperty, name, value}, {map, typeId, operations}) do
          newMap = Map.put(map, name, value)
+         Private.write_property(typeId, name, value)
          {:noreply, {newMap, typeId, operations}}
     end
     
