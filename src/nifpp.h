@@ -683,7 +683,7 @@ inline TERM make(ErlNifEnv *env, const QVariant &var)
         return make(env, var.toReal());
     } else if (var.canConvert<QVariantList>()) {
         //TODO
-        return make(env, 0);
+        return make(env, var.value<QVariantList>());
     } else {
         return make(env, 0);
     }
