@@ -3,6 +3,15 @@ defmodule QML.ChannelServer do
 
     alias QML.Private
 
+    def setProperty(pid, property, value) do
+        GenServer.cast(pid, {:setProperty, property, value})
+    end
+
+    def property(pid, property) do
+        GenServer.call(pid, {:property, property})
+    end
+
+    # Server handling
     def start_link({typeId, operations}) do
         GenServer.start_link(__MODULE__, {typeId, operations})
     end
@@ -53,4 +62,5 @@ defmodule QML.ChannelServer do
 #         operations.propertyChanged(name, value)
 #         {:reply, value, {newMap, operations}}
 #     end
+
 end

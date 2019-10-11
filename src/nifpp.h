@@ -636,30 +636,40 @@ inline int get(ErlNifEnv *env, ERL_NIF_TERM term, QVariant &var)
     if (enif_is_atom(env, term)) {
         str_atom val;
         ret = get(env, term, val);
-        var.setValue<QString>(QString(val.c_str()));
+        if (ret > 0) {
+            var.setValue<QString>(QString(val.c_str()));
+        }
     } else if (enif_is_number(env, term)) {
         qreal rVal;
         int iVal;
         unsigned int uVal;
         ret = get(env, term, rVal);
-        if (ret) {
+        if (ret > 0) {
             var.setValue<qreal>(rVal);
         } else {
             ret = get(env, term, iVal);
-            if (ret) {
+            if (ret > 0) {
                 var.setValue<int>(iVal);
             } else {
                 ret = get(env, term, uVal);
-                var.setValue<unsigned int>(uVal);
+                if (ret > 0) {
+                    var.setValue<unsigned int>(uVal);
+                }
             }
         }
-
-    //try a string
+    } else if (enif_is_list(env, term)) {
+        QList<QVariant> val;
+        ret = get(env, term, val);
+        if (ret > 0) {
+            var.setValue<QList<QVariant>>(val);
+        }
+    // Try a binary string
     } else {
         QString val;
         ret = get(env, term, val);
-
-        var.setValue<QString>(val);
+        if (ret > 0) {
+            var.setValue<QString>(val);
+        }
     }
 
     return ret;
@@ -671,6 +681,9 @@ inline TERM make(ErlNifEnv *env, const QVariant &var)
         return make(env, var.toString());
     } else if (var.canConvert<qreal>()) {
         return make(env, var.toReal());
+    } else if (var.canConvert<QVariantList>()) {
+        //TODO
+        return make(env, 0);
     } else {
         return make(env, 0);
     }

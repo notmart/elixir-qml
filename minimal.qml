@@ -67,6 +67,8 @@ Kirigami.ApplicationWindow {
                 id: elixirChannel
                 typeId: "elixirTestChannel"
                 property alias test: textField.text
+                property var list: []
+                onListChanged: print("List property changed: " + list)
                 signal testSignal(string param1, int param2)
                 signal missingSignal(string param1, string param2)
             }

@@ -77,18 +77,23 @@ static ERL_NIF_TERM write_property(ErlNifEnv* env, int argc, const ERL_NIF_TERM 
     };
     QString typeId = QString(typeAtom.data());
 
-    QString property;
-    if (!nifpp::get(env, argv[1], property)) {
-        return enif_make_badarg(env);
-    };
-    //TODO: support multiple types
-    QVariant value;
-    if (!nifpp::get(env, argv[2], value)) {
-        return enif_make_badarg(env);
-    };
-
     auto *channel = s_application->channel(typeId);
     if (channel) {
+
+        QString property;
+        if (!nifpp::get(env, argv[1], property)) {
+            return enif_make_badarg(env);
+        };
+
+        //TODO: use also the type info from the qmetaproperty?
+        //QMetaProperty prop = channel->metaObject()->property(channel->metaObject()->indexOfProperty(property.toUtf8()));
+
+        QVariant value;
+
+        if (!nifpp::get(env, argv[2], value)) {
+            return enif_make_badarg(env);
+        };
+
         channel->bridge()->receiveProperty(property, value);
     }
 
