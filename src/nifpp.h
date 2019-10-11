@@ -1,5 +1,5 @@
-
-//          Copyright Daniel Goertzen 2012.
+// Copyright Marco Martin 2019 <mart@kde.org>
+// Copyright Daniel Goertzen 2012.
 // Distributed under the Boost Software License, Version 1.0.
 //    (See accompanying file LICENSE_1_0.txt or copy at
 //          http://www.boost.org/LICENSE_1_0.txt)
@@ -197,6 +197,11 @@ template<typename TK, typename TV> TERM make(ErlNifEnv *env, const std::map<TK,T
 
 template<typename TK, typename TV> int get(ErlNifEnv *env, ERL_NIF_TERM term, std::unordered_map<TK,TV> &var);
 template<typename TK, typename TV> TERM make(ErlNifEnv *env, const std::unordered_map<TK,TV> &var);
+
+//FIXME: template substitution fails with the above std::unordered_map
+template<typename TK, typename TV> int getQMap(ErlNifEnv *env, ERL_NIF_TERM term, QMap<TK,TV> &var);
+template<typename TK, typename TV> TERM makeQMap(ErlNifEnv *env, const QMap<TK,TV> &var);
+
 #endif
 
 // Qt
@@ -639,6 +644,7 @@ inline int get(ErlNifEnv *env, ERL_NIF_TERM term, QVariant &var)
         if (ret > 0) {
             var.setValue<QString>(QString(val.c_str()));
         }
+
     } else if (enif_is_number(env, term)) {
         qreal rVal;
         int iVal;
@@ -657,13 +663,23 @@ inline int get(ErlNifEnv *env, ERL_NIF_TERM term, QVariant &var)
                 }
             }
         }
+
     } else if (enif_is_list(env, term)) {
         QList<QVariant> val;
         ret = get(env, term, val);
         if (ret > 0) {
             var.setValue<QList<QVariant>>(val);
         }
+
+    } else if (enif_is_map(env, term)) {
+        QMap<QString, QVariant> val;
+        ret = getQMap<QString, QVariant>(env, term, val);
+        if (ret > 0) {
+            var.setValue<QMap<QString, QVariant>>(val);
+        }
+
     // Try a binary string
+    // NOTE: character list strings are not supported
     } else {
         QString val;
         ret = get(env, term, val);
@@ -682,8 +698,9 @@ inline TERM make(ErlNifEnv *env, const QVariant &var)
     } else if (var.canConvert<qreal>()) {
         return make(env, var.toReal());
     } else if (var.canConvert<QVariantList>()) {
-        //TODO
         return make(env, var.value<QVariantList>());
+    } else if (var.canConvert<QVariantMap>()) {
+        return makeQMap<QString, QVariant>(env, var.value<QMap<QString, QVariant>>());
     } else {
         return make(env, 0);
     }
@@ -1215,6 +1232,25 @@ TERM make(ErlNifEnv *env, const std::unordered_map<TK,TV> &var)
     for(auto i=var.begin(); i!=var.end(); i++)
     {
         enif_make_map_put(env, map, make(env, i->first), make(env, i->second), (ERL_NIF_TERM *)&map);
+    }
+    return map;
+}
+
+
+// Qt
+template<typename TK, typename TV>
+int getQMap(ErlNifEnv *env, ERL_NIF_TERM term, QMap<TK,TV> &var)
+{
+    var.clear();
+    return map_for_each<TK,TV>(env, term, [&var](TK key, TV value){var[key]=value;});
+}
+
+template<typename TK, typename TV>
+TERM makeQMap(ErlNifEnv *env, const QMap<TK,TV> &var)
+{
+    TERM map(enif_make_new_map(env));
+    for (auto i = var.constBegin(); i != var.constEnd(); i++) {
+        enif_make_map_put(env, map, make(env, i.key()), make(env, i.value()), (ERL_NIF_TERM *)&map);
     }
     return map;
 }
