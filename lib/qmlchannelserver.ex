@@ -37,10 +37,6 @@ defmodule QML.ChannelServer do
     end
 
     def handle_call({:setProperty, name, value}, {fromPid, _}, {map, typeId, operations}) do
-        IO.puts "setProperty"
-        IO.puts value
-        IO.inspect fromPid
-
         newMap = Map.put(map, name, value)
 
         if fromPid != 0 do

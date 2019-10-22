@@ -13,16 +13,12 @@ defmodule ElixirTestChannel do
     #phoenix liveview come idea
 
     def testSignal(param1, param2) do
-        IO.puts "On ElixirTestChannel testSignal"
-        IO.puts param1
-        IO.puts param2
+        IO.puts "On ElixirTestChannel testSignal invoked from QML signal, param1 is #{param1}, param2 is #{param2}"
     end
     #pub/subscribe
     #qinvokable->chimate
     def propertyChanged(name, value) do
-        IO.puts "On ElixirTestChannel propertyChanged"
-        IO.puts name
-        IO.puts value
+        IO.puts "On ElixirTestChannel propertyChanged. name: #{name}; value: #{value}"
     end
 end
 

@@ -631,7 +631,11 @@ inline int get(ErlNifEnv *env, ERL_NIF_TERM term, QString &var)
 }
 inline TERM make(ErlNifEnv *env, const QString &var)
 {
-    return nifpp::TERM(enif_make_string_len(env, var.toUtf8().data(), var.size(), ERL_NIF_LATIN1));
+    ErlNifBinary output_binary;
+    enif_alloc_binary(strlen(var.toUtf8().data()), &output_binary);
+    strcpy((char *)output_binary.data, (char *)var.toUtf8().data());
+    
+    return nifpp::TERM(enif_make_binary(env, &output_binary));
 }
 
 inline int get(ErlNifEnv *env, ERL_NIF_TERM term, QVariant &var)
