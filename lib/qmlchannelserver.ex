@@ -12,51 +12,51 @@ defmodule QML.ChannelServer do
     end
 
     # Server handling
-    def start_link({typeId, operations}) do
-        GenServer.start_link(__MODULE__, {typeId, operations})
+    def start_link({typeId, watcher}) do
+        GenServer.start_link(__MODULE__, {typeId, watcher})
     end
 
-    def init({typeId, operations}) do
+    def init({typeId, watcher}) do
         #channels must be unique per typeId
         nil = Process.whereis(typeId)
 
         Private.register_qml_channel typeId
 
         Process.register(self(), typeId)
-        {:ok, {%{}, typeId, operations}}
+        {:ok, {%{}, typeId, watcher}}
     end
 
-    def handle_info({:signalFromQml, name, argv}, {map, typeId, operations}) do
-       # operations.signal(name, argv)
-        apply(operations, name |> to_string |> String.to_atom, argv)
-        {:noreply, {map, typeId, operations}}
+    def handle_info({:signalFromQml, name, argv}, {map, typeId, watcher}) do
+       # watcher.signal(name, argv)
+        apply(watcher, name |> to_string |> String.to_atom, argv)
+        {:noreply, {map, typeId, watcher}}
     end
 
-    def handle_call({:property, name}, _from, {map, typeId, operations}) do
-        {:reply, Map.fetch(map, name), {map, typeId, operations}}
+    def handle_call({:property, name}, _from, {map, typeId, watcher}) do
+        {:reply, Map.fetch(map, name), {map, typeId, watcher}}
     end
 
-    def handle_call({:setProperty, name, value}, {fromPid, _}, {map, typeId, operations}) do
+    def handle_call({:setProperty, name, value}, {fromPid, _}, {map, typeId, watcher}) do
         newMap = Map.put(map, name, value)
 
         if fromPid != 0 do
             Private.write_property(typeId, name, value)
         end
 
-        operations.propertyChanged(name, value)
-        {:reply, nil, {newMap, typeId, operations}}
+        watcher.propertyChanged(name, value)
+        {:reply, nil, {newMap, typeId, watcher}}
     end
 
-    def handle_cast({:setProperty, name, value}, {map, typeId, operations}) do
+    def handle_cast({:setProperty, name, value}, {map, typeId, watcher}) do
          newMap = Map.put(map, name, value)
          Private.write_property(typeId, name, value)
-         {:noreply, {newMap, typeId, operations}}
+         {:noreply, {newMap, typeId, watcher}}
     end
     
-#     def handle_call({:propertySet, name, value}, from, {map, operations}) do
+#     def handle_call({:propertySet, name, value}, from, {map, watcher}) do
 #         newMap = Map.put(map, name, value)
-#         operations.propertyChanged(name, value)
-#         {:reply, value, {newMap, operations}}
+#         watcher.propertyChanged(name, value)
+#         {:reply, value, {newMap, watcher}}
 #     end
 
 end

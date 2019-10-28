@@ -1,8 +1,8 @@
-defmodule QML.Channel do
+defmodule QML.ChannelWatcher do
     defmacro __using__(_) do
         quote do
-            import QML.Channel
-            @behaviour QML.Channel
+            import QML.ChannelWatcher
+            @behaviour QML.ChannelWatcher
         end
     end
 

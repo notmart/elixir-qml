@@ -3,12 +3,12 @@ defmodule TestChannelManager do
 
     def channelForType :elixirTestChannel do
         IO.puts "doing an elixirtestchannel"
-        ElixirTestChannel
+        ElixirTestChannelWatcher
     end
 end
 #guardare Phoenix liveview
-defmodule ElixirTestChannel do
-    use QML.Channel
+defmodule ElixirTestChannelWatcher do
+    use QML.ChannelWatcher
 
     #phoenix liveview come idea
 
