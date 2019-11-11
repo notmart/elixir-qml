@@ -1,7 +1,7 @@
-defmodule TestChannelManager do
-    @behaviour QML.ChannelManager
+defmodule TestWatcherManager do
+    @behaviour QML.ChannelWatcherManager
 
-    def channelForType :elixirTestChannel do
+    def watcherForType :elixirTestChannel do
         IO.puts "doing an elixirtestchannel"
         ElixirTestChannelWatcher
     end
@@ -27,7 +27,7 @@ defmodule ExampleApp do
  
   def start(_type, _args) do
     children = [
-        {QML.ApplicationServer, {TestChannelManager, "minimal.qml"}}
+        {QML.ApplicationServer, {TestWatcherManager, "minimal.qml"}}
     ]
  
  #TODO: not a supervisor, but when it dies, kill the whole VM?

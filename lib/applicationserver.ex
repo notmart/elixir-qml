@@ -3,11 +3,11 @@ defmodule QML.ApplicationServer do
 
     alias QML.Private
 
-    def start_link({channelManager, file}) do
-        GenServer.start_link(__MODULE__, {channelManager, file})
+    def start_link({watcherManager, file}) do
+        GenServer.start_link(__MODULE__, {watcherManager, file})
     end
 
-    def init({channelManager, file}) do
+    def init({watcherManager, file}) do
         # Only an ApplicationServer can run at once
         nil = Process.whereis(:qmlApplicationServer)
         Private.register_application_server
@@ -27,11 +27,11 @@ defmodule QML.ApplicationServer do
         ]
         Supervisor.start_link(children, strategy: :one_for_one)
 
-        {:ok, {:loading, channelManager, file, guiPid}}
+        {:ok, {:loading, watcherManager, file, guiPid}}
     end
 
-    def handle_info({:loaded, _}, {_state, channelManager, file, guiPid}) do
-        {:noreply, {:loaded, channelManager, file, guiPid}}
+    def handle_info({:loaded, _}, {_state, watcherManager, file, guiPid}) do
+        {:noreply, {:loaded, watcherManager, file, guiPid}}
     end
 
     def handle_info({:error, file}, state) do
@@ -40,19 +40,19 @@ defmodule QML.ApplicationServer do
         {:stop, :normal, state}
     end
 
-    def handle_info({:channel_registered, typeId}, {:loading, channelManager, file, guiPid}) do
-        qmlChannel = channelManager.channelForType typeId
+    def handle_info({:channel_registered, typeId}, {:loading, watcherManager, file, guiPid}) do
+        qmlChannel = watcherManager.watcherForType typeId
         
         {:ok, channel} = DynamicSupervisor.start_child(QML.ChannelSupervisor, {QML.Channel, {typeId, qmlChannel}})
         
         IO.inspect typeId
         IO.inspect channel
-        {:noreply, {:loading, channelManager, file, guiPid}}
+        {:noreply, {:loading, watcherManager, file, guiPid}}
     end
 
-    def handle_info({:channel_unregistered, typeId}, {:loading, channelManager, file, guiPid}) do
+    def handle_info({:channel_unregistered, typeId}, {:loading, watcherManager, file, guiPid}) do
         #DynamicSupervisor.terminate_child(QML.ChannelSupervisor, map pids for typeId)
-        {:noreply, {:loading, channelManager, file, guiPid}}
+        {:noreply, {:loading, watcherManager, file, guiPid}}
     end
 
     # TODO: remove?
