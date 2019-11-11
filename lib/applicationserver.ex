@@ -43,7 +43,7 @@ defmodule QML.ApplicationServer do
     def handle_info({:channel_registered, typeId}, {:loading, channelManager, file, guiPid}) do
         qmlChannel = channelManager.channelForType typeId
         
-        {:ok, channel} = DynamicSupervisor.start_child(QML.ChannelSupervisor, {QML.ChannelServer, {typeId, qmlChannel}})
+        {:ok, channel} = DynamicSupervisor.start_child(QML.ChannelSupervisor, {QML.Channel, {typeId, qmlChannel}})
         
         IO.inspect typeId
         IO.inspect channel

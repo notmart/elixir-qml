@@ -1,4 +1,4 @@
-defmodule QML.ChannelServer do
+defmodule QML.Channel do
     use GenServer
 
     alias QML.Private
