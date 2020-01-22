@@ -53,10 +53,4 @@ defmodule QML.Channel do
          {:noreply, {newMap, typeId, watcher}}
     end
     
-#     def handle_call({:propertySet, name, value}, from, {map, watcher}) do
-#         newMap = Map.put(map, name, value)
-#         watcher.propertyChanged(name, value)
-#         {:reply, value, {newMap, watcher}}
-#     end
-
 end
