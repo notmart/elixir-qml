@@ -29,34 +29,31 @@ defmodule QML.Channel do
         Private.register_qml_channel typeId
 
         Process.register(self(), typeId)
-        {:ok, {%{}, typeId, watcher}}
+        {:ok, {typeId, watcher}}
     end
 
-    def handle_info({:signalFromQml, name, argv}, {map, typeId, watcher}) do
+    def handle_info({:signalFromQml, name, argv}, {typeId, watcher}) do
        # watcher.signal(name, argv)
         apply(watcher, name |> to_string |> String.to_atom, argv)
-        {:noreply, {map, typeId, watcher}}
+        {:noreply, {typeId, watcher}}
     end
 
-    def handle_call({:property, name}, _from, {map, typeId, watcher}) do
-        {:reply, Map.fetch(map, name), {map, typeId, watcher}}
+    def handle_call({:property, name}, _from, {typeId, watcher}) do
+        {:reply, Private.read_property(typeId, name), {typeId, watcher}}
     end
 
-    def handle_call({:setProperty, name, value}, {fromPid, _}, {map, typeId, watcher}) do
-        newMap = Map.put(map, name, value)
-
+    def handle_call({:setProperty, name, value}, {fromPid, _}, {typeId, watcher}) do
         if fromPid != 0 do
             Private.write_property(typeId, name, value)
         end
 
         watcher.propertyChanged(name, value)
-        {:reply, nil, {newMap, typeId, watcher}}
+        {:reply, nil, {typeId, watcher}}
     end
 
-    def handle_cast({:setProperty, name, value}, {map, typeId, watcher}) do
-         newMap = Map.put(map, name, value)
+    def handle_cast({:setProperty, name, value}, {typeId, watcher}) do
          Private.write_property(typeId, name, value)
-         {:noreply, {newMap, typeId, watcher}}
+         {:noreply, {typeId, watcher}}
     end
 
 end
