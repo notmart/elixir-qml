@@ -35,44 +35,40 @@ defmodule QML.ModelChannel do
     def init({typeId, watcher}) do
         #channels must be unique per typeId
         nil = Process.whereis(typeId)
-IO.puts("SWSW")
+
         Private.register_qml_model_channel typeId
 
         Process.register(self(), typeId)
-        {:ok, {[], typeId, watcher}}
+        {:ok, {typeId, watcher}}
     end
 
-    def handle_call({:data, row}, _from, {listData, typeId, watcher}) do
-        {:reply, Enum.fetch(listData, row), {listData, typeId, watcher}}
+    def handle_call({:data, row}, _from, {typeId, watcher}) do
+        {:reply, Private.model_data(typeId, row), {typeId, watcher}}
     end
 
-    def handle_cast({:prependRow, rowData}, {listData, typeId, watcher}) do
+    def handle_cast({:prependRow, rowData}, {typeId, watcher}) do
          Private.model_insert_row(typeId, 0, rowData)
-         {:noreply, {[rowData | listData], typeId, watcher}}
+         {:noreply, {typeId, watcher}}
     end
 
-    def handle_cast({:appendRow, rowData}, {listData, typeId, watcher}) do
-         Private.model_insert_row(typeId, length(listData), rowData)
-         {:noreply, {listData ++ [rowData], typeId, watcher}}
+    def handle_cast({:appendRow, rowData}, {typeId, watcher}) do
+         Private.model_insert_row(typeId, Private.model_length(typeId), rowData)
+         {:noreply, {typeId, watcher}}
     end
 
-    def handle_cast({:insertRow, row, rowData}, {listData, typeId, watcher}) do
+    def handle_cast({:insertRow, row, rowData}, {typeId, watcher}) do
          Private.model_insert_row(typeId, row, rowData)
-         newList = List.insert_at(listData, rowData, rowData)
-         {:noreply, {newList, typeId, watcher}}
+         {:noreply, {typeId, watcher}}
     end
 
-    def handle_cast({:moveRow, from, to}, {listData, typeId, watcher}) do
+    def handle_cast({:moveRow, from, to}, {typeId, watcher}) do
          Private.model_move_row(typeId, from, to)
-         {rowData, newList} = List.pop_at(listData, from)
-         newList = List.insert_at(newList, to, rowData)
-         {:noreply, {newList, typeId, watcher}}
+         {:noreply, {typeId, watcher}}
     end
 
-    def handle_cast({:removeRow, row}, {listData, typeId, watcher}) do
+    def handle_cast({:removeRow, row}, {typeId, watcher}) do
          Private.model_remove_row(typeId, row)
-         newList = List.delete_at(listData, row)
-         {:noreply, {newList, typeId, watcher}}
+         {:noreply, {typeId, watcher}}
     end
 end
 
