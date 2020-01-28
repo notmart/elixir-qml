@@ -18,6 +18,7 @@
 */
 
 #include "application.h"
+#include "simpledatamodel.h"
 #include <string>
 
 #include <QApplication>

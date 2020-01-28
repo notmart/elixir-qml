@@ -3,6 +3,12 @@ defmodule QML.Channel do
 
     alias QML.Private
 
+    defmacro __using__(opts) do
+        quote do
+            use GenServer
+        end
+    end
+
     def setProperty(pid, property, value) do
         GenServer.cast(pid, {:setProperty, property, value})
     end
@@ -52,5 +58,5 @@ defmodule QML.Channel do
          Private.write_property(typeId, name, value)
          {:noreply, {newMap, typeId, watcher}}
     end
-    
+
 end

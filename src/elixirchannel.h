@@ -29,6 +29,7 @@ class QQuickItem;
 
 class Application;
 class ElixirChannel;
+class SimpleDataModel;
 
 class PropertyBridge : public QObject
 {
@@ -55,7 +56,8 @@ private:
 class ElixirChannel : public QObject, public QQmlParserStatus
 {
     Q_OBJECT
-    Q_PROPERTY(QString typeId READ typeId WRITE setTypeId NOTIFY typeIdChanged)
+    Q_PROPERTY(QString typeId READ typeId WRITE setTypeId NOTIFY typeIdChanged FINAL)
+    Q_PROPERTY(SimpleDataModel *model READ model CONSTANT FINAL)
 
     Q_INTERFACES(QQmlParserStatus)
 
@@ -69,6 +71,8 @@ public:
 
     void setTypeId(const QString &typeId);
     QString typeId() const;
+
+    SimpleDataModel *model();
 
     PropertyBridge *bridge() const;
 
@@ -86,6 +90,7 @@ private:
     int m_unnamedId;
     static Application *s_spplication;
     PropertyBridge *m_propertyBridge = nullptr;
+    SimpleDataModel *m_model = nullptr;
 
     static int s_maxUnnamedId;
 };

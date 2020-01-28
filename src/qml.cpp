@@ -100,6 +100,37 @@ static ERL_NIF_TERM write_property(ErlNifEnv* env, int argc, const ERL_NIF_TERM 
     return argv[0];
 }
 
+static ERL_NIF_TERM read_property(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
+{
+    if (!s_application) {
+        return argv[0];
+    }
+
+    if (argc != 2) {
+        return enif_make_badarg(env);
+    }
+
+
+    nifpp::str_atom typeAtom;
+    if (!nifpp::get(env, argv[0], typeAtom)) {
+        return enif_make_badarg(env);
+    };
+    QString typeId = QString(typeAtom.data());
+
+    auto *channel = s_application->channel(typeId);
+    if (channel) {
+
+        QString property;
+        if (!nifpp::get(env, argv[1], property)) {
+            return enif_make_badarg(env);
+        };
+
+        return nifpp::make(env, channel->property(property.toUtf8()));
+    }
+
+    return argv[0];
+}
+
 static ERL_NIF_TERM exec(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
 {
     if (s_application) {
@@ -133,6 +164,7 @@ static ErlNifFunc nif_funcs[] =
     {"register_application_server", 0, register_application_server},
     {"register_qml_channel", 1, register_qml_channel},
     {"write_property", 3, write_property},
+    {"read_property", 2, read_property},
     {"exec", 1, exec, ERL_NIF_DIRTY_JOB_CPU_BOUND }
 };
 

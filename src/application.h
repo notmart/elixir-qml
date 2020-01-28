@@ -61,7 +61,7 @@ private:
     QString m_test;
     QPointer<QQmlApplicationEngine> m_engine;
 
-    // Keus must correspond
+    // Keys must correspond
     // pids of the elixir-side QmlChannel
     QHash<QString, ErlNifPid *> m_elixirQmlChannels;
     // QML-side ElixirChannel

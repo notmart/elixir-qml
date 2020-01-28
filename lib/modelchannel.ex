@@ -1,5 +1,5 @@
 defmodule QML.ModelChannel do
-    use GenServer
+    use QML.Channel
 
     alias QML.Private
 
@@ -29,13 +29,13 @@ defmodule QML.ModelChannel do
 
     # Server handling
     def start_link({typeId, watcher}) do
-        GenServer.start_link(__MODULE__, {typeId, watcher})
+        QML.Channel.start_link({typeId, watcher})
     end
 
     def init({typeId, watcher}) do
         #channels must be unique per typeId
         nil = Process.whereis(typeId)
-
+IO.puts("SWSW")
         Private.register_qml_model_channel typeId
 
         Process.register(self(), typeId)
@@ -47,18 +47,18 @@ defmodule QML.ModelChannel do
     end
 
     def handle_cast({:prependRow, rowData}, {listData, typeId, watcher}) do
-         Private.model_prepend_row(typeId, row)
+         Private.model_insert_row(typeId, 0, rowData)
          {:noreply, {[rowData | listData], typeId, watcher}}
     end
 
     def handle_cast({:appendRow, rowData}, {listData, typeId, watcher}) do
-         Private.model_append_row(typeId, row)
+         Private.model_insert_row(typeId, length(listData), rowData)
          {:noreply, {listData ++ [rowData], typeId, watcher}}
     end
 
-    def handle_cast({:insertRow, rowData}, {listData, typeId, watcher}) do
-         Private.model_insert_row(typeId, row)
-         newList = List.insert_at(listData, row, rowData)
+    def handle_cast({:insertRow, row, rowData}, {listData, typeId, watcher}) do
+         Private.model_insert_row(typeId, row, rowData)
+         newList = List.insert_at(listData, rowData, rowData)
          {:noreply, {newList, typeId, watcher}}
     end
 
@@ -70,7 +70,7 @@ defmodule QML.ModelChannel do
     end
 
     def handle_cast({:removeRow, row}, {listData, typeId, watcher}) do
-         Private.model_remove_row(typeId, from, to)
+         Private.model_remove_row(typeId, row)
          newList = List.delete_at(listData, row)
          {:noreply, {newList, typeId, watcher}}
     end

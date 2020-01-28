@@ -23,5 +23,9 @@ defmodule QML.Private do
   def write_property(_identifier, _property, _value) do
     "QML NIF library not loaded"
   end
-  
+
+  def read_property(_identifier, _property) do
+    "QML NIF library not loaded"
+  end
+
 end
