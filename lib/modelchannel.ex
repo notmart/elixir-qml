@@ -7,16 +7,16 @@ defmodule QML.ModelChannel do
         GenServer.call(pid, {:data, rowData})
     end
 
-    def prependRow(pid, row) do
-        GenServer.cast(pid, {:prependRow, row})
+    def prependRows(pid, row) do
+        GenServer.cast(pid, {:prependRows, row})
     end
 
-    def appendRow(pid, row) do
-        GenServer.cast(pid, {:appendRow, row})
+    def appendRows(pid, row) do
+        GenServer.cast(pid, {:appendRows, row})
     end
 
-    def insertRow(pid, row) do
-        GenServer.cast(pid, {:insertRow, row})
+    def insertRows(pid, row) do
+        GenServer.cast(pid, {:insertRows, row})
     end
 
     def moveRow(pid, from, to) do
@@ -49,17 +49,17 @@ defmodule QML.ModelChannel do
         {:reply, Private.model_data(typeId, row), {typeId, watcher}}
     end
 
-    def handle_cast({:prependRow, rowData}, {typeId, watcher}) do
+    def handle_cast({:prependRows, rowData}, {typeId, watcher}) do
          Private.model_insert_rows(typeId, 0, rowData)
          {:noreply, {typeId, watcher}}
     end
 
-    def handle_cast({:appendRow, rowData}, {typeId, watcher}) do
+    def handle_cast({:appendRows, rowData}, {typeId, watcher}) do
          Private.model_insert_rows(typeId, Private.model_length(typeId), rowData)
          {:noreply, {typeId, watcher}}
     end
 
-    def handle_cast({:insertRow, row, rowData}, {typeId, watcher}) do
+    def handle_cast({:insertRows, row, rowData}, {typeId, watcher}) do
          Private.model_insert_rows(typeId, row, rowData)
          watcher.rowInserted(row, rowData)
          {:noreply, {typeId, watcher}}
