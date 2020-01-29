@@ -28,4 +28,15 @@ defmodule QML.Private do
     "QML NIF library not loaded"
   end
 
+  def register_qml_model_channel(_identifier) do
+    "QML NIF library not loaded"
+  end
+
+  def model_length(_identifier) do
+    "QML NIF library not loaded"
+  end
+
+  def model_insert_row(_identifier, _row, _data) do
+    "QML NIF library not loaded"
+  end
 end

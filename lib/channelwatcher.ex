@@ -3,6 +3,13 @@ defmodule QML.ChannelWatcher do
         quote do
             import QML.ChannelWatcher
             @behaviour QML.ChannelWatcher
+
+            @doc false
+            def init(_pid) do
+                :ok
+            end
+
+            defoverridable [init: 1]
         end
     end
 

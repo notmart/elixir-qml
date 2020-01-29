@@ -22,13 +22,12 @@
 #include <QDebug>
 
 SimpleDataModel::SimpleDataModel(QObject *parent)
-    : QAbstractListModel(parent)
+    : ElixirModelChannel(parent)
 {
 }
 
 SimpleDataModel::~SimpleDataModel()
 {
-    //TODO: delete everything
 }
 
 void SimpleDataModel::insertData(int position, const QList<QVariantMap> &dataList)
@@ -40,22 +39,13 @@ void SimpleDataModel::insertData(int position, const QList<QVariantMap> &dataLis
         return;
     }
 
-    // First insert: prepare role names
-    // NOTE: the role names MUST stay fixed for the entire lifetime of the model object, if new roles are needed, a new model object must be created
-    if (m_roles.isEmpty()) {
-        int role = Qt::UserRole + 1;
-        for (const auto &key : dataList.first().keys()) {
-            m_roles[role] = key.toUtf8();
-            ++role;
-        }
-    }
-
     beginInsertRows(QModelIndex(), position, position + dataList.count() - 1);
     int i = 0;
     for (const auto &item : dataList) {
         m_data.insert(position + i, item);
         ++i;
     }
+
     endInsertRows();
 }
 
@@ -76,7 +66,7 @@ void SimpleDataModel::updateData(int position, const QList<QVariantMap> &dataLis
         const QVariantMap newValues = dataList[i];
         for (auto newIt = newValues.begin(); newIt != newValues.end(); ++newIt) {
             (*it)[newIt.key()] = newIt.value();
-            roles.insert(m_roles.key(newIt.key().toUtf8()));
+            roles.insert(roleNames().key(newIt.key().toUtf8()));
         }
         ++i;
     }
@@ -150,15 +140,11 @@ QVariant SimpleDataModel::data(const QModelIndex &index, int role) const
     }
     const int row = index.row();
 
-    if (row < 0 || row >= m_data.count() || !m_roles.contains(role)) {
+    if (row < 0 || row >= m_data.count() || !roleNames().contains(role)) {
         return QVariant();
     }
 
-    return m_data[row][QString::fromUtf8(m_roles[role])];
+    return m_data[row][QString::fromUtf8(roleNames()[role])];
 }
 
-QHash<int, QByteArray> SimpleDataModel::roleNames() const
-{
-    return m_roles;
-}
-
+#include "moc_simpledatamodel.cpp"

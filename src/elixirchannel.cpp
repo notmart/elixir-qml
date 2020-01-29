@@ -19,7 +19,6 @@
 
 #include "elixirchannel.h"
 #include "application.h"
-#include "simpledatamodel.h"
 
 #include <string>
 
@@ -229,14 +228,6 @@ QString ElixirChannel::typeId() const
 PropertyBridge *ElixirChannel::bridge() const
 {
     return m_propertyBridge;
-}
-
-SimpleDataModel *ElixirChannel::model()
-{
-    if (!m_model) {
-        m_model = new SimpleDataModel(this);
-    }
-    return m_model;
 }
 
 #include "moc_elixirchannel.cpp"

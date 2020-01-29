@@ -25,6 +25,7 @@
 #include <QObject>
 
 #include "elixirchannel.h"
+#include "elixirmodelchannel.h"
 
 #include "erl_nif.h"
 #include "nifpp.h"
@@ -47,7 +48,12 @@ public:
     bool registerQmlChannel(const QString &typeId, ErlNifPid *pid);
     bool registerElixirChannel(const QString &typeId, ElixirChannel *elixirChannel);
 
+    bool registerQmlModelChannel(const QString &typeId, ErlNifPid *pid);
+    bool registerElixirModelChannel(const QString &typeId, ElixirModelChannel *elixirModelChannel);
+
     ElixirChannel *channel(const QString &typeId) const;
+
+    ElixirModelChannel *modelChannel(const QString &typeId) const;
 
     int exec(const QString &path);
 
@@ -66,5 +72,10 @@ private:
     QHash<QString, ErlNifPid *> m_elixirQmlChannels;
     // QML-side ElixirChannel
     QHash<QString, ElixirChannel *>  m_qmlElixirChannels;
+
+    // pids of the elixir-side QmlModelChannel
+    QHash<QString, ErlNifPid *> m_elixirQmlModelChannels;
+    // QML-side ElixirChannel
+    QHash<QString, ElixirModelChannel *>  m_qmlElixirModelChannels;
 };
 

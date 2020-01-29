@@ -29,6 +29,9 @@ defmodule QML.Channel do
         Private.register_qml_channel typeId
 
         Process.register(self(), typeId)
+
+        :ok = watcher.init(self())
+
         {:ok, {typeId, watcher}}
     end
 

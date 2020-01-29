@@ -1,5 +1,5 @@
 defmodule QML.ModelChannel do
-    use QML.Channel
+    use GenServer
 
     alias QML.Private
 
@@ -29,7 +29,7 @@ defmodule QML.ModelChannel do
 
     # Server handling
     def start_link({typeId, watcher}) do
-        QML.Channel.start_link({typeId, watcher})
+        GenServer.start_link(__MODULE__, {typeId, watcher})
     end
 
     def init({typeId, watcher}) do
@@ -39,6 +39,9 @@ defmodule QML.ModelChannel do
         Private.register_qml_model_channel typeId
 
         Process.register(self(), typeId)
+
+        :ok = watcher.init(self())
+
         {:ok, {typeId, watcher}}
     end
 
@@ -58,6 +61,7 @@ defmodule QML.ModelChannel do
 
     def handle_cast({:insertRow, row, rowData}, {typeId, watcher}) do
          Private.model_insert_row(typeId, row, rowData)
+         watcher.rowInserted(row, rowData)
          {:noreply, {typeId, watcher}}
     end
 

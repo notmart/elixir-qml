@@ -41,9 +41,9 @@ defmodule QML.ApplicationServer do
     end
 
     def handle_info({:channel_registered, typeId}, {:loading, watcherManager, file, guiPid}) do
-        qmlChannel = watcherManager.watcherForType typeId
+        watcher = watcherManager.watcherForType typeId
         
-        {:ok, channel} = DynamicSupervisor.start_child(QML.ChannelSupervisor, {QML.Channel, {typeId, qmlChannel}})
+        {:ok, channel} = DynamicSupervisor.start_child(QML.ChannelSupervisor, {QML.Channel, {typeId, watcher}})
         
         IO.inspect typeId
         IO.inspect channel
@@ -51,6 +51,21 @@ defmodule QML.ApplicationServer do
     end
 
     def handle_info({:channel_unregistered, typeId}, {:loading, watcherManager, file, guiPid}) do
+        #DynamicSupervisor.terminate_child(QML.ChannelSupervisor, map pids for typeId)
+        {:noreply, {:loading, watcherManager, file, guiPid}}
+    end
+
+    def handle_info({:model_channel_registered, typeId}, {:loading, watcherManager, file, guiPid}) do
+        watcher = watcherManager.watcherForType typeId
+        
+        {:ok, channel} = DynamicSupervisor.start_child(QML.ChannelSupervisor, {QML.ModelChannel, {typeId, watcher}})
+        
+        IO.inspect typeId
+        IO.inspect channel
+        {:noreply, {:loading, watcherManager, file, guiPid}}
+    end
+
+    def handle_info({:model_channel_unregistered, typeId}, {:loading, watcherManager, file, guiPid}) do
         #DynamicSupervisor.terminate_child(QML.ChannelSupervisor, map pids for typeId)
         {:noreply, {:loading, watcherManager, file, guiPid}}
     end

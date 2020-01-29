@@ -2,8 +2,13 @@ defmodule TestWatcherManager do
     @behaviour QML.ChannelWatcherManager
 
     def watcherForType :elixirTestChannel do
-        IO.puts "doing an elixirtestchannel"
+        IO.puts "doing an ElixirTestChannelWatcher"
         ElixirTestChannelWatcher
+    end
+
+    def watcherForType :testModel do
+        IO.puts "doing an ElixirTestModelChannelWatcher"
+        ElixirTestModelChannelWatcher
     end
 end
 #guardare Phoenix liveview
@@ -12,6 +17,12 @@ defmodule ElixirTestChannelWatcher do
 
     #phoenix liveview come idea
 
+    def init(pid) do
+        IO.puts "ElixirTestChannel process created with pid"
+        inspect pid
+        :ok
+    end
+
     def testSignal(param1, param2) do
         IO.puts "On ElixirTestChannel testSignal invoked from QML signal, param1 is #{param1}, param2 is #{param2}"
     end
@@ -19,6 +30,21 @@ defmodule ElixirTestChannelWatcher do
     #qinvokable->chimate
     def propertyChanged(name, value) do
         IO.puts "On ElixirTestChannel propertyChanged. name: #{name}; value: #{value}"
+    end
+end
+
+defmodule ElixirTestModelChannelWatcher do
+    use QML.ModelChannelWatcher
+
+    def init(pid) do
+        QML.ModelChannel.appendRow(pid, %{"title" => "Test row #1", "description" => "Descrition of the first row"})
+        QML.ModelChannel.appendRow(pid, %{"title" => "Test row #2", "description" => "Descrition of the second row"})
+        QML.ModelChannel.appendRow(pid, %{"title" => "Test row #3", "description" => "Descrition of the third row"})
+        :ok
+    end
+
+    def rowInserted(row, data) do
+        IO.puts "On ElixirTestModelChannelWatcher rowInserted. row: #{row}; data: #{data}"
     end
 end
 

@@ -21,7 +21,7 @@ import QtQuick 2.1
 import QtQuick.Layouts 1.4
 import QtQuick.Controls 2.2 as Controls
 import org.kde.kirigami 2.4 as Kirigami
-import qmlelixir 1.0
+import qmlelixir 1.0 as Elixir
 
 Kirigami.ApplicationWindow {
     id: root
@@ -63,7 +63,7 @@ Kirigami.ApplicationWindow {
         id: mainPageComponent
         Kirigami.ScrollablePage {
             title: "Hello"
-            ElixirChannel {
+            Elixir.ElixirChannel {
                 id: elixirChannel
                 typeId: "elixirTestChannel"
                 property alias test: textField.text
@@ -81,20 +81,45 @@ Kirigami.ApplicationWindow {
                 signal testSignal(string param1, int param2)
                 signal missingSignal(string param1, string param2)
             }
-            ColumnLayout {
-                Controls.Label {
-                    text: hack.test
+            header: Controls.ToolBar {
+                Kirigami.Theme.inherit: false
+                Kirigami.Theme.colorSet: Kirigami.Theme.Window
+                contentItem: RowLayout {
+                    Controls.Label {
+                        text: hack.test
+                    }
+                    Controls.ToolButton {
+                        text: "Send Signal"
+                        onClicked: elixirChannel.testSignal("First param", 123)
+                    }
+                    Controls.ToolButton {
+                        text: "Send Unmanaged Signal"
+                        onClicked: elixirChannel.missingSignal("First param", "second param")
+                    }
+                    Controls.TextField {
+                        id: textField
+                    }
+                    Item {
+                        Layout.fillWidth: true
+                    }
                 }
-                Controls.Button {
-                    text: "Say Hello"
-                    onClicked: elixirChannel.testSignal("First param", 123)
+            }
+            ListView {
+                Layout.fillWidth: true
+                Layout.fillHeight: true
+                model: Elixir.ElixirModelChannel {
+                    typeId: "testModel"
+                    roles: ["title", "description"]
                 }
-                Controls.Button {
-                    text: "Say Hello2"
-                    onClicked: elixirChannel.missingSignal("First param", "second param")
-                }
-                Controls.TextField {
-                    id: textField
+                delegate: Kirigami.AbstractListItem {
+                    contentItem: ColumnLayout {
+                        Controls.Label {
+                            text: model.title
+                        }
+                        Controls.Label {
+                            text: model.description
+                        }
+                    }
                 }
             }
         }

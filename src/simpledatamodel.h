@@ -19,12 +19,10 @@
 
 #pragma once
 
-#include <QAbstractListModel>
+#include "elixirmodelchannel.h"
 
-class AbstractDelegate;
-class DelegatesModel;
-
-class SimpleDataModel : public QAbstractListModel
+//TODO: all in elixirmodelchannel?
+class SimpleDataModel : public ElixirModelChannel
 {
     Q_OBJECT
 
@@ -36,14 +34,14 @@ public:
     /**
      * Insert new data in the model, at a given position
      */
-    void insertData(int position, const QList<QVariantMap> &dataList);
+    void insertData(int position, const QList<QVariantMap> &dataList) override;
 
     /**
      * update the value of items from position to dataList.count()
      * for each key contained in dataList.
      * keys not present will not be updated
      */
-    void updateData(int position, const QList<QVariantMap> &dataList);
+    void updateData(int position, const QList<QVariantMap> &dataList) override;
 
     /**
      * clears the whole model
@@ -55,10 +53,9 @@ public:
     bool removeRows(int row, int count, const QModelIndex &parent = QModelIndex()) override;
     int rowCount(const QModelIndex &parent = QModelIndex()) const override;
     QVariant data(const QModelIndex &index, int role = Qt::UserRole + 1) const override;
-    QHash<int, QByteArray> roleNames() const override;
 
 private:
-    QHash<int, QByteArray> m_roles;
+    QHash<int, QByteArray> m_roles; //TODO: remove
     QList<QVariantMap> m_data;
 };
 

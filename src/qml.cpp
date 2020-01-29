@@ -19,6 +19,7 @@
 
 #include "erl_nif.h"
 #include "application.h"
+#include "simpledatamodel.h"
 
 #include <QDebug>
 
@@ -57,6 +58,25 @@ static ERL_NIF_TERM register_qml_channel(ErlNifEnv* env, int argc, const ERL_NIF
     ErlNifPid* pid = (ErlNifPid*) enif_alloc(sizeof(ErlNifPid));
     pid = enif_self(env, pid);
     s_application->registerQmlChannel(typeId, pid);
+    return argv[0];
+}
+
+static ERL_NIF_TERM register_qml_model_channel(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
+{
+    if (!s_application) {
+        return argv[0];
+    }
+
+    if (argc != 1) {
+        return enif_make_badarg(env);
+    }
+
+    //TODO: fix QString typeId = nifpp::get<QString>(env, argv[0]);
+    QString typeId = QString(nifpp::get<nifpp::str_atom>(env, argv[0]).data());
+
+    ErlNifPid* pid = (ErlNifPid*) enif_alloc(sizeof(ErlNifPid));
+    pid = enif_self(env, pid);
+    s_application->registerQmlModelChannel(typeId, pid);
     return argv[0];
 }
 
@@ -131,6 +151,73 @@ static ERL_NIF_TERM read_property(ErlNifEnv* env, int argc, const ERL_NIF_TERM a
     return argv[0];
 }
 
+static ERL_NIF_TERM model_length(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
+{
+    if (!s_application) {
+        return argv[0];
+    }
+
+    if (argc != 1) {
+        return enif_make_badarg(env);
+    }
+
+
+    nifpp::str_atom typeAtom;
+    if (!nifpp::get(env, argv[0], typeAtom)) {
+        return enif_make_badarg(env);
+    };
+    QString typeId = QString(typeAtom.data());
+
+    auto *channel = s_application->modelChannel(typeId);
+    if (channel) {
+
+        return nifpp::make(env, channel->rowCount());
+    }
+
+    return argv[0];
+}
+
+static ERL_NIF_TERM model_insert_row(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
+{
+    if (!s_application) {
+        return argv[0];
+    }
+
+    if (argc != 3) {
+        return enif_make_badarg(env);
+    }
+
+
+    nifpp::str_atom typeAtom;
+    if (!nifpp::get(env, argv[0], typeAtom)) {
+        return enif_make_badarg(env);
+    };
+    QString typeId = QString(typeAtom.data());
+
+    auto *channel = s_application->modelChannel(typeId);
+    if (channel) {
+
+        SimpleDataModel *model = static_cast<SimpleDataModel *>(channel);
+        int row;
+        if (!nifpp::get(env, argv[1], row)) {
+            return enif_make_badarg(env);
+        };
+
+        //TODO: use also the type info from the qmetaproperty?
+        //QMetaProperty prop = channel->metaObject()->property(channel->metaObject()->indexOfProperty(property.toUtf8()));
+
+        QVariant data;
+
+        if (!nifpp::get(env, argv[2], data)) {
+            return enif_make_badarg(env);
+        };
+
+        model->bridge()->insertData(row, {data.value<QVariantMap>()});
+    }
+
+    return argv[0];
+}
+
 static ERL_NIF_TERM exec(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
 {
     if (s_application) {
@@ -163,8 +250,11 @@ static ErlNifFunc nif_funcs[] =
 {
     {"register_application_server", 0, register_application_server},
     {"register_qml_channel", 1, register_qml_channel},
+    {"register_qml_model_channel", 1, register_qml_model_channel},
     {"write_property", 3, write_property},
     {"read_property", 2, read_property},
+    {"model_length", 1, model_length},
+    {"model_insert_row", 3, model_insert_row},
     {"exec", 1, exec, ERL_NIF_DIRTY_JOB_CPU_BOUND }
 };
 

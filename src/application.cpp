@@ -52,7 +52,9 @@ Application::Application(ErlNifPid *pid, QObject *parent)
     : QObject(parent),
       m_pid(pid)
 {
+    qRegisterMetaType<QList<QVariantMap>>();
     qmlRegisterType<ElixirChannel>("qmlelixir", 1, 0, "ElixirChannel");
+    qmlRegisterType<SimpleDataModel>("qmlelixir", 1, 0, "ElixirModelChannel");
 }
 
 Application::~Application()
@@ -96,7 +98,51 @@ bool Application::registerElixirChannel(const QString &typeId, ElixirChannel *el
         ErlNifEnv* env = enif_alloc_env();
 
         enif_send(NULL, m_pid, env, nifpp::make(env,  
-            std::make_tuple(nifpp::str_atom("channel_removed"), 
+            std::make_tuple(nifpp::str_atom("channel_unregistered"), 
+                typeId.toUtf8().constData())));
+
+        enif_free_env(env);
+    });
+}
+
+bool Application::registerQmlModelChannel(const QString &typeId, ErlNifPid *pid)
+{
+    m_elixirQmlModelChannels[typeId] = pid;
+
+    if (m_qmlElixirModelChannels.contains(typeId)) {
+        m_qmlElixirModelChannels[typeId]->setPid(pid);
+    }
+}
+
+bool Application::registerElixirModelChannel(const QString &typeId, ElixirModelChannel *elixirModelChannel)
+{
+    if (m_qmlElixirModelChannels.contains(typeId)) {
+        // TODO: is this too much? tough having a duplicate typeid is completely a no go
+        qFatal(QStringLiteral("ElixirModelChannel typeId not unique: %1").arg(typeId).toUtf8());
+        return false;
+    }
+
+    m_qmlElixirModelChannels[typeId] = elixirModelChannel;
+
+    if (m_elixirQmlModelChannels.contains(typeId)) {
+        elixirModelChannel->setPid(m_elixirQmlModelChannels[typeId]);
+    }
+
+    ErlNifEnv* env = enif_alloc_env();
+
+    enif_send(NULL, m_pid, env, nifpp::make(env,  
+        std::make_tuple(nifpp::str_atom("model_channel_registered"),        
+            nifpp::str_atom(typeId.toUtf8()))));
+
+    enif_free_env(env);
+
+    connect(elixirModelChannel, &QObject::destroyed, this, [this, typeId]() {
+        m_qmlElixirModelChannels.remove(typeId);
+
+        ErlNifEnv* env = enif_alloc_env();
+
+        enif_send(NULL, m_pid, env, nifpp::make(env,  
+            std::make_tuple(nifpp::str_atom("model_channel_unregistered"), 
                 typeId.toUtf8().constData())));
 
         enif_free_env(env);
@@ -106,6 +152,11 @@ bool Application::registerElixirChannel(const QString &typeId, ElixirChannel *el
 ElixirChannel *Application::channel(const QString &typeId) const
 {
     return m_qmlElixirChannels.value(typeId);
+}
+
+ElixirModelChannel *Application::modelChannel(const QString &typeId) const
+{
+    return m_qmlElixirModelChannels.value(typeId);
 }
 
 void Application::send(const QString &text)
