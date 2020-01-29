@@ -25,6 +25,8 @@ defmodule ElixirTestChannelWatcher do
 
     def testSignal(param1, param2) do
         IO.puts "On ElixirTestChannel testSignal invoked from QML signal, param1 is #{param1}, param2 is #{param2}"
+
+        QML.ModelChannel.appendRow(Process.whereis(:testModel), %{"title" => "Test row ##{param1}", "description" => "Descrition: #{param2}"})
     end
     #pub/subscribe
     #qinvokable->chimate
@@ -37,13 +39,12 @@ defmodule ElixirTestModelChannelWatcher do
     use QML.ModelChannelWatcher
 
     def init(pid) do
-        QML.ModelChannel.appendRow(pid, %{"title" => "Test row #1", "description" => "Descrition of the first row"})
-        QML.ModelChannel.appendRow(pid, %{"title" => "Test row #2", "description" => "Descrition of the second row"})
-        QML.ModelChannel.appendRow(pid, %{"title" => "Test row #3", "description" => "Descrition of the third row"})
+        QML.ModelChannel.appendRow(pid, [%{"title" => "Test row #1", "description" => "Descrition of the first row"}, %{"title" => "Test row #2", "description" => "Descrition of the second row"},
+        %{"title" => "Test row #3", "description" => "Descrition of the third row"}])
         :ok
     end
 
-    def rowInserted(row, data) do
+    def rowsInserted(row, data) do
         IO.puts "On ElixirTestModelChannelWatcher rowInserted. row: #{row}; data: #{data}"
     end
 end

@@ -15,7 +15,7 @@ defmodule QML.ModelChannelWatcher do
 
     @callback init(arg :: pid()) :: none
 
-    @callback rowInserted(arg :: integer(), arg :: any) :: none
+    @callback rowsInserted(arg :: integer(), arg :: any) :: none
 end
 
 

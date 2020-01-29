@@ -170,14 +170,13 @@ static ERL_NIF_TERM model_length(ErlNifEnv* env, int argc, const ERL_NIF_TERM ar
 
     auto *channel = s_application->modelChannel(typeId);
     if (channel) {
-
         return nifpp::make(env, channel->rowCount());
     }
 
     return argv[0];
 }
 
-static ERL_NIF_TERM model_insert_row(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
+static ERL_NIF_TERM model_insert_rows(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
 {
     if (!s_application) {
         return argv[0];
@@ -203,16 +202,27 @@ static ERL_NIF_TERM model_insert_row(ErlNifEnv* env, int argc, const ERL_NIF_TER
             return enif_make_badarg(env);
         };
 
-        //TODO: use also the type info from the qmetaproperty?
-        //QMetaProperty prop = channel->metaObject()->property(channel->metaObject()->indexOfProperty(property.toUtf8()));
-
         QVariant data;
 
         if (!nifpp::get(env, argv[2], data)) {
             return enif_make_badarg(env);
         };
 
-        model->bridge()->insertData(row, {data.value<QVariantMap>()});
+        if (data.canConvert<QVariantList>()) {
+            // TODO: make nifpp understand QList<QVariantMap> ? the qml part can get confused
+            QList<QVariantMap> rowList;
+            for (const QVariant &row : data.value<QVariantList>()) {
+                if (!row.canConvert<QVariantMap>()) {
+                    return enif_make_badarg(env);
+                }
+                rowList << row.value<QVariantMap>();
+            }
+            model->bridge()->insertData(row, rowList);
+        } else if (data.canConvert<QVariantMap>()) {
+            model->bridge()->insertData(row, {data.value<QVariantMap>()});
+        } else {
+            return enif_make_badarg(env);
+        }
     }
 
     return argv[0];
@@ -254,7 +264,7 @@ static ErlNifFunc nif_funcs[] =
     {"write_property", 3, write_property},
     {"read_property", 2, read_property},
     {"model_length", 1, model_length},
-    {"model_insert_row", 3, model_insert_row},
+    {"model_insert_rows", 3, model_insert_rows},
     {"exec", 1, exec, ERL_NIF_DIRTY_JOB_CPU_BOUND }
 };
 

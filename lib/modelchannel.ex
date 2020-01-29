@@ -50,17 +50,17 @@ defmodule QML.ModelChannel do
     end
 
     def handle_cast({:prependRow, rowData}, {typeId, watcher}) do
-         Private.model_insert_row(typeId, 0, rowData)
+         Private.model_insert_rows(typeId, 0, rowData)
          {:noreply, {typeId, watcher}}
     end
 
     def handle_cast({:appendRow, rowData}, {typeId, watcher}) do
-         Private.model_insert_row(typeId, Private.model_length(typeId), rowData)
+         Private.model_insert_rows(typeId, Private.model_length(typeId), rowData)
          {:noreply, {typeId, watcher}}
     end
 
     def handle_cast({:insertRow, row, rowData}, {typeId, watcher}) do
-         Private.model_insert_row(typeId, row, rowData)
+         Private.model_insert_rows(typeId, row, rowData)
          watcher.rowInserted(row, rowData)
          {:noreply, {typeId, watcher}}
     end

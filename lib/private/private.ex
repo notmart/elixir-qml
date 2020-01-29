@@ -36,7 +36,7 @@ defmodule QML.Private do
     "QML NIF library not loaded"
   end
 
-  def model_insert_row(_identifier, _row, _data) do
+  def model_insert_rows(_identifier, _row, _data) do
     "QML NIF library not loaded"
   end
 end
