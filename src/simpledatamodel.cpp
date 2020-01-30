@@ -113,7 +113,7 @@ bool SimpleDataModel::moveRows(const QModelIndex &sourceParent, int sourceRow, i
 
 bool SimpleDataModel::removeRows(int row, int count, const QModelIndex &parent)
 {
-    if (row <= 0 || count <= 0 || row + count > m_data.count() || parent.isValid()) {
+    if (row < 0 || count <= 0 || row + count > m_data.count() || parent.isValid()) {
         return false;
     }
 

@@ -19,12 +19,12 @@ defmodule QML.ModelChannel do
         GenServer.cast(pid, {:insertRows, row})
     end
 
-    def moveRow(pid, from, to) do
-        GenServer.call(pid, {:moveRow, from, to})
+    def moveRows(pid, from, to) do
+        GenServer.call(pid, {:moveRows, from, to})
     end
 
-    def removeRow(pid, row) do
-        GenServer.call(pid, {:removeRow, row})
+    def removeRows(pid, row, count) do
+        GenServer.cast(pid, {:removeRows, row, count})
     end
 
     # Server handling
@@ -65,13 +65,13 @@ defmodule QML.ModelChannel do
          {:noreply, {typeId, watcher}}
     end
 
-    def handle_cast({:moveRow, from, to}, {typeId, watcher}) do
-         Private.model_move_row(typeId, from, to)
+    def handle_cast({:moveRows, from, to}, {typeId, watcher}) do
+         Private.model_move_rows(typeId, from, to)
          {:noreply, {typeId, watcher}}
     end
 
-    def handle_cast({:removeRow, row}, {typeId, watcher}) do
-         Private.model_remove_row(typeId, row)
+    def handle_cast({:removeRows, row, count}, {typeId, watcher}) do
+         Private.model_remove_rows(typeId, row, count)
          {:noreply, {typeId, watcher}}
     end
 end

@@ -258,6 +258,44 @@ static ERL_NIF_TERM model_insert_rows(ErlNifEnv* env, int argc, const ERL_NIF_TE
     return argv[0];
 }
 
+static ERL_NIF_TERM model_remove_rows(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
+{
+    if (!s_application) {
+        return argv[0];
+    }
+
+    if (argc != 3) {
+        return enif_make_badarg(env);
+    }
+
+
+    nifpp::str_atom typeAtom;
+    if (!nifpp::get(env, argv[0], typeAtom)) {
+        return enif_make_badarg(env);
+    };
+    QString typeId = QString(typeAtom.data());
+
+    auto *channel = s_application->modelChannel(typeId);
+    if (channel) {
+
+        SimpleDataModel *model = static_cast<SimpleDataModel *>(channel);
+        int row;
+        if (!nifpp::get(env, argv[1], row)) {
+            return enif_make_badarg(env);
+        };
+
+        int count;
+
+        if (!nifpp::get(env, argv[2], count)) {
+            return enif_make_badarg(env);
+        };
+
+        model->bridge()->removeRows(row, count, QModelIndex());
+    }
+
+    return argv[0];
+}
+
 static ERL_NIF_TERM exec(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
 {
     if (s_application) {
@@ -296,6 +334,7 @@ static ErlNifFunc nif_funcs[] =
     {"model_length", 1, model_length},
     {"model_data", 2, model_data},
     {"model_insert_rows", 3, model_insert_rows},
+    {"model_remove_rows", 3, model_remove_rows},
     {"exec", 1, exec, ERL_NIF_DIRTY_JOB_CPU_BOUND }
 };
 

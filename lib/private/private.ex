@@ -43,4 +43,8 @@ defmodule QML.Private do
   def model_insert_rows(_identifier, _row, _data) do
     "QML NIF library not loaded"
   end
+
+  def model_remove_rows(_identifier, _row, _count) do
+    "QML NIF library not loaded"
+  end
 end
