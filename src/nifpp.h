@@ -695,6 +695,11 @@ inline int get(ErlNifEnv *env, ERL_NIF_TERM term, QVariant &var)
     return ret;
 }
 
+inline TERM make(ErlNifEnv *env, const QVariantMap &var)
+{
+    return makeQMap<QString, QVariant>(env, var);
+}
+
 inline TERM make(ErlNifEnv *env, const QVariant &var)
 {
     if (var.canConvert<QString>()) {

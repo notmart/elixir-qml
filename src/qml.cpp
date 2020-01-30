@@ -176,6 +176,36 @@ static ERL_NIF_TERM model_length(ErlNifEnv* env, int argc, const ERL_NIF_TERM ar
     return argv[0];
 }
 
+static ERL_NIF_TERM model_data(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
+{
+    if (!s_application) {
+        return argv[0];
+    }
+
+    if (argc != 2) {
+        return enif_make_badarg(env);
+    }
+
+
+    nifpp::str_atom typeAtom;
+    if (!nifpp::get(env, argv[0], typeAtom)) {
+        return enif_make_badarg(env);
+    };
+    QString typeId = QString(typeAtom.data());
+
+    int row;
+    if (!nifpp::get(env, argv[1], row)) {
+        return enif_make_badarg(env);
+    };
+
+    auto *channel = s_application->modelChannel(typeId);
+    if (channel) {
+        return nifpp::make(env, channel->get(row));
+    }
+
+    return argv[0];
+}
+
 static ERL_NIF_TERM model_insert_rows(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
 {
     if (!s_application) {
@@ -264,6 +294,7 @@ static ErlNifFunc nif_funcs[] =
     {"write_property", 3, write_property},
     {"read_property", 2, read_property},
     {"model_length", 1, model_length},
+    {"model_data", 2, model_data},
     {"model_insert_rows", 3, model_insert_rows},
     {"exec", 1, exec, ERL_NIF_DIRTY_JOB_CPU_BOUND }
 };
