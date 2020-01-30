@@ -44,7 +44,12 @@ defmodule QML.Private do
     "QML NIF library not loaded"
   end
 
+  def model_move_rows(_identifier, _rowFrom, _count, _rowTo) do
+    "QML NIF library not loaded"
+  end
+
   def model_remove_rows(_identifier, _row, _count) do
     "QML NIF library not loaded"
   end
+
 end
